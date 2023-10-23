@@ -1,0 +1,24 @@
+{
+  "name": "smars-world-editor-backend",
+  "version": "0.1.0",
+  "description": "World editor suite for SMARS",
+  "main": "index.js",
+  "scripts": {
+    "test": "test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dan-atack/smars-world-builder.git"
+  },
+  "keywords": [
+    "Express",
+    "Node",
+    "Typescript"
+  ],
+  "author": "Dan Atack",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/dan-atack/smars-world-builder/issues"
+  },
+  "homepage": "https://github.com/dan-atack/smars-world-builder#readme"
+}
