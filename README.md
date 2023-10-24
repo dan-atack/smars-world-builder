@@ -1,4 +1,4 @@
-# SMARS: The World Editor Suite
+# SMARS: The World Builder Suite
 
 ## This repository contains all of the tools used for creating content for Project SMARS
 
