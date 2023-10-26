@@ -5,7 +5,7 @@ import { constants } from "../constants";
 
 // Standardize name of the database:
 const dbName: string = process.env.DB_NAME as string || "smars";    // Use DB called 'smars' by default
-const collectionName = 'modules';
+const collectionName = 'test-modules';
 // Simple object shape for displaying the names and types of existing modules in the DB
 type ModuleDigestData = {
     id: ObjectId,
@@ -38,7 +38,7 @@ export type ModuleInfo = {
     }[]
 }
 
-// Returns a list of "module data" objects: every module's name and type
+// Returns a list of "module data" objects: every module's name, type and id
 const loadModules = async (req: Request, res: Response) => {
     const client = new MongoClient(constants.DB_URL_STRING, {});
     try {
@@ -76,13 +76,14 @@ const loadModules = async (req: Request, res: Response) => {
     }
 }
 
+// Returns the full module data object for one module, given its ID
 const loadModuleData = async (req: Request, res: Response) => {
     const { id } = req.params;
     const dbQuery = { "_id" : new ObjectId(id) };
     const client = new MongoClient(constants.DB_URL_STRING, {});
     try {
         await client.connect();
-        console.log(`Database connection established. Loading module data for module ${id}`);
+        console.log(`Database connection established. Loading module data for module ${id}.`);
         const db = client.db(dbName);
         await db.collection(collectionName).findOne(dbQuery, (err, result) => {
             if (err) console.log(err);
@@ -101,6 +102,25 @@ const loadModuleData = async (req: Request, res: Response) => {
     }
 }
 
+const newModuleData = async (req: Request, res: Response) => {
+    const data: ModuleInfo = req.body;
+    const client = new MongoClient(constants.DB_URL_STRING, {});
+    try {
+        await client.connect();
+        console.log(`Database connection established. Uploading new data for ${data.name} module.`);
+        const db = client.db(dbName);
+        const i = await db.collection(collectionName).insertOne(data);
+        assert.notEqual("", i.insertedId);
+        console.log(`Uploaded data for new module: ${data.name}`);
+        res.status(200);
+        client.close();
+        console.log("Closing client connection");
+    } catch (err) {
+        console.log(`ERROR: The following error occurred while trying to post new module data for ${data.name}:`)
+        console.log(err);
+    }
+}
+
 module.exports = {
-    loadModules, loadModuleData
+    loadModules, loadModuleData, newModuleData
 }
