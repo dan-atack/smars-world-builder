@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { MongoClient } from "mongodb";
+import { MongoClient, ObjectId } from "mongodb";
 import assert from "assert";
 import { constants } from "../constants";
 
@@ -8,6 +8,7 @@ const dbName: string = process.env.DB_NAME as string || "smars";    // Use DB ca
 const collectionName = 'modules';
 // Simple object shape for displaying the names and types of existing modules in the DB
 type ModuleDigestData = {
+    id: ObjectId,
     name: string,
     type: string
 }
@@ -56,12 +57,13 @@ const loadModules = async (req: Request, res: Response) => {
                     let mods: ModuleDigestData[] = [];
                     result.forEach((mod) => {
                         const digest: ModuleDigestData = {
+                            id: mod._id,
                             name: mod.name,
                             type: mod.type
                         };
                         mods.push(digest);
                     })
-                    res.status(200).json({ status: 200, mods: mods})
+                    res.status(200).json({ status: 200, data: mods})
                     client.close();
                 } else {
                     console.log(`No modules found in ${collectionName} collection.`);
@@ -74,38 +76,31 @@ const loadModules = async (req: Request, res: Response) => {
     }
 }
 
-// const loadGameData = async (req: Request, res: Response) => {
-//     const { id } = req.params;
-//     const dbQuery = { "_id": new ObjectId(id) };
-//     const client = new MongoClient(constants.DB_URL_STRING, {});
-//     try {
-//         await client.connect();
-//         console.log(`Database connection established. Loading saved game data for save ID ${id}`);
-//         const db = client.db(dbName);
-//         await db.collection(collectionName).findOne(dbQuery, (err, result) => {
-//             if (result != null) {
-//                 if (result.difficulty === "") {
-//                     console.log(`Warning: No difficulty settings found for save file ${id} - defaulting to 'medium'`);
-//                     result.difficulty = "medium";
-//                 }
-//                 if (result.map_type === "") {
-//                     console.log(`Warning: No map type settings found for save file ${id} - defaulting to 'polar'`);
-//                     result.map_type = "polar";
-//                 }
-//                 console.log(`Dispatching saved game data for game ${result.game_name}.`);
-//                 res.status(200).json({ status: 200, data: result })
-//             } else {
-//                 console.log(`Saved game data not found for game ${id}`);
-//                 res.status(404).json({ status: 404, message: "Saved game file not found :("});
-//             }
-//             client.close();
-//         })
-//     } catch (err) {
-//         console.log(`ERROR: The following error occurred while trying to load saved game file ${id}:`);
-//         console.log(err);
-//     }
-// }
+const loadModuleData = async (req: Request, res: Response) => {
+    const { id } = req.params;
+    const dbQuery = { "_id" : new ObjectId(id) };
+    const client = new MongoClient(constants.DB_URL_STRING, {});
+    try {
+        await client.connect();
+        console.log(`Database connection established. Loading module data for module ${id}`);
+        const db = client.db(dbName);
+        await db.collection(collectionName).findOne(dbQuery, (err, result) => {
+            if (err) console.log(err);
+            if (result != null) {
+                console.log(`Loaded module data for ${result._id}.`);
+                res.status(200).json({ status: 200, data: result })
+            } else {
+                console.log(`Data not found for module ${id}`);
+                res.status(404).json({ status: 404, message: "Module data not found :("});
+            }
+            client.close();
+        })
+    } catch (err) {
+        console.log(`ERROR: The following error occurred while trying to load module data for module ${id}:`);
+        console.log(err);
+    }
+}
 
 module.exports = {
-    loadModules
+    loadModules, loadModuleData
 }
