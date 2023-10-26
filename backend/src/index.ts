@@ -28,7 +28,7 @@
  app.use(express.json());
  
  // Server Endpoints
-//  app.use(require('./endpoints/randomEventEndpoints'));
+ app.use(require('./endpoints/moduleEndpoints'));
  
  // Server Activation
  
