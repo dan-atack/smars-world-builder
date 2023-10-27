@@ -103,12 +103,14 @@ const loadModuleData = async (req: Request, res: Response) => {
     }
 }
 
+// Takes a module info object and adds it to the database
 const newModuleData = async (req: Request, res: Response) => {
     const data: ModuleInfo = req.body;
     const client = new MongoClient(constants.DB_URL_STRING, {});
     try {
         await client.connect();
         console.log(`Database connection established. Uploading new data for ${data.name} module.`);
+        // TODO: See if a module with the same name already exists and refuse the push if so
         const db = client.db(dbName);
         const i = await db.collection(collectionName).insertOne(data);
         assert.notEqual("", i.insertedId);

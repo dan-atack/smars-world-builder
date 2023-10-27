@@ -27,7 +27,10 @@ export type ModuleInfo = {
 };
 
 export const CONSTANTS = {
-    URL_PREFIX: `http://localhost:${process.env.SERVER_PORT || "7001"}/api`
+    URL_PREFIX: `http://localhost:${process.env.SERVER_PORT || "7001"}/api`,
     // TODO: Copy colour definitions from SMARS Constants
+    APP_BACKGROUND: "#000000",
+    SCREEN_WIDTH: 1400,
+    SCREEN_HEIGHT: 800
 }
 
