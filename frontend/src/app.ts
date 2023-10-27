@@ -1,5 +1,5 @@
 import P5 from "p5";
-import { getModules } from "./server_functions";
+import { getModules, getOneModule } from "./server_functions";
 
 const sketch = (p5: P5) => {
 
@@ -9,6 +9,8 @@ const sketch = (p5: P5) => {
         p5.background(0);
         const setter = () => {};
         getModules(setter);
+        const id = "6505d7b4fa92111e5e312e22";  // test id for cantina
+        getOneModule(id, setter);
     }
 
     p5.mouseClicked = () => {
