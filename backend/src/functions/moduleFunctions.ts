@@ -5,7 +5,7 @@ import { constants } from "../constants";
 
 // Standardize name of the database:
 const dbName: string = process.env.DB_NAME as string || "smars";    // Use DB called 'smars' by default
-const collectionName = 'test-modules';
+const collectionName = 'modules';
 // Simple object shape for displaying the names and types of existing modules in the DB
 type ModuleDigestData = {
     id: ObjectId,
@@ -13,7 +13,8 @@ type ModuleDigestData = {
     type: string
 }
 
-export type Resource = [ name: string, quantity: number];
+// Copied from the official SMARS type definitions:
+export type Resource = [ string, number ];
 
 // Copy Module Data shape from official SMARS type definition:
 export type ModuleInfo = {
@@ -36,7 +37,7 @@ export type ModuleInfo = {
         params: number[]        // The arguments for creating the shape - Values are all in terms of GRID SPACES, not pixels!!
         mode?: string           // For optional non-numeric arguments to arc shapes
     }[]
-}
+};
 
 // Returns a list of "module data" objects: every module's name, type and id
 const loadModules = async (req: Request, res: Response) => {

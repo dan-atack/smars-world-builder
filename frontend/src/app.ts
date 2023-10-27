@@ -1,10 +1,14 @@
 import P5 from "p5";
+import { getModules } from "./server_functions";
 
 const sketch = (p5: P5) => {
 
     p5.setup = () => {
         const canvas = p5.createCanvas(960, 640);
         canvas.parent("app");
+        p5.background(0);
+        const setter = () => {};
+        getModules(setter);
     }
 
     p5.mouseClicked = () => {
