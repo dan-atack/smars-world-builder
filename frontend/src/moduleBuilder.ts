@@ -4,7 +4,7 @@ import Screen from "./screen";
 import Navbar from "./navbar";
 import ColourPalette from "./colourPalette";
 import InputsArea from "./inputsArea";
-import LayersList from "./LayersList";
+import LayersList from "./layersList";
 import ModuleCanvas from "./moduleCanvas";
 import { CONSTANTS, ModuleInfo } from "./constants";
 import { getModules, getOneModule, addNewModule } from "./server_functions";
