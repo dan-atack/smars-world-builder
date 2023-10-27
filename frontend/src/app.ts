@@ -31,6 +31,7 @@ const sketch = (p5: P5) => {
     p5.draw = () => {
         p5.fill(255, 0, 0);
         p5.rect(100, 100, 100, 100);
+        p5.textAlign(p5.CENTER);
         if (moduleBuilder.currentScreen) moduleBuilder.render(p5);
     }
 

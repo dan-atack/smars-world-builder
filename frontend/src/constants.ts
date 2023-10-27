@@ -30,7 +30,10 @@ export const CONSTANTS = {
     URL_PREFIX: `http://localhost:${process.env.SERVER_PORT || "7001"}/api`,
     // TODO: Copy colour definitions from SMARS Constants
     APP_BACKGROUND: "#000000",
-    SCREEN_WIDTH: 1400,
-    SCREEN_HEIGHT: 800
+    SCREEN_WIDTH: 1600,
+    SCREEN_HEIGHT: 800,
+    NAVBAR_X: 320,
+    NAVBAR_WIDTH: 960,
+    NAVBAR_HEIGHT: 80,
 }
 
