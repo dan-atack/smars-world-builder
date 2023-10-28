@@ -35,5 +35,9 @@ export const CONSTANTS = {
     NAVBAR_X: 320,
     NAVBAR_WIDTH: 960,
     NAVBAR_HEIGHT: 80,
+    colors: {
+        GREEN_TERMINAL: "#0FFF13",
+        GREEN_BACKGROUND: "#023803",
+    }
 }
 
