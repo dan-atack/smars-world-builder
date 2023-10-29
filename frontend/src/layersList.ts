@@ -10,4 +10,8 @@ export default class LayersList extends EditorField{
         super(x, y, w, h, label);
     }
 
+    setup = () => {
+        console.log("Setting up");
+    }
+
 }

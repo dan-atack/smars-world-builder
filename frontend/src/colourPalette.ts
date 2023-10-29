@@ -12,4 +12,8 @@ export default class ColourPalette extends EditorField{
         this.currentColour = "blue";
     }
 
+    setup = () => {
+        console.log("Setting up");
+    }
+
 }

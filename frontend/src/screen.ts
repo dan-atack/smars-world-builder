@@ -19,10 +19,6 @@ export default class Screen {
         this.switchScreen = switchScreen;
     }
 
-    setup = () => {
-        this.currentScreen = true;
-    }
-
     handleClick = (mouseX: number, mouseY: number) => {
         console.log(`Screen clicked at (${mouseX}, ${mouseY})`);     // Overridden by instantiations
     }

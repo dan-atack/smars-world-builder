@@ -1,0 +1,42 @@
+$bg-color: black;
+$txt-color: white;
+$module-inputs-top: -720px;
+$module-inputs-left: 696px;
+
+body {
+  box-sizing: border-box;
+  padding: 0;
+  margin: 0;
+  background-color: $bg-color;
+  color: white;
+  font-family: 'Montserrat', sans-serif;
+}
+
+.container {
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.module-input {
+  border-radius: 8px;
+  position: relative;
+  width: 200px;
+  font-size: 20px;
+  height: 32px;
+  top: $module-inputs-top;
+  left: $module-inputs-left;
+}
+
+.save-game-name {
+  border-radius: 0px;
+  border: 2px solid blueviolet;
+  color: limegreen;
+  background-color: black;
+  position: absolute;
+  font-size: 36px;
+  height: 48px;
+  top: 256px;
+}

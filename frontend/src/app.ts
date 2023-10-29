@@ -3,12 +3,14 @@ import ModuleBuilder from "./moduleBuilder";
 import Menu from "./menu";
 import { CONSTANTS } from "./constants";
 
+import "./styles.scss";
+
 const sketch = (p5: P5) => {
 
     const switchScreen = (screen: string) => {
         switch (screen) {
             case "moduleBuilder":
-                moduleBuilder.setup();
+                moduleBuilder.setup(p5);
                 break;
         }
     }

@@ -17,7 +17,7 @@ export default class Navbar extends EditorField{
     constructor(x: number, y: number, w: number, h: number, switchScreen: (screen: string) => void) {
         super(x, y, w, h);
         this._buttonX = this._x + 8;
-        this._buttonY = this._y + 8;
+        this._buttonY = this._y + 16;
         this._buttonWidth = 216;
         this._buttonHeight = 48;
         this._buttonTextSize = 36;

@@ -9,4 +9,8 @@ export default class ModuleCanvas extends EditorField{
         super(x, y, w, h, label);
     }
 
+    setup = () => {
+        console.log("Setting up");
+    }
+
 }

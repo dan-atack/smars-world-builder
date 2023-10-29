@@ -28,6 +28,7 @@ export default class EditorField {
     }
 
     render = (p5: P5) => {
+        p5.textAlign(p5.CENTER);
         p5.fill("#0F0F0F");
         p5.stroke("green");
         p5.rect(this._x, this._y, this._width, this._height, 4, 4, 4, 4);
@@ -37,6 +38,6 @@ export default class EditorField {
         p5.text(this._label, this._x + this._width / 2, this._y + 64);
         this._buttons.forEach((button) => {
             button.render(p5);
-        })
+        });
     }
 }

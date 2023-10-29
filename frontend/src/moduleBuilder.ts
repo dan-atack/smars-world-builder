@@ -26,7 +26,7 @@ export default class ModuleBuilder extends Screen {
         super(switchScreen);
         this._navbar = new Navbar(CONSTANTS.NAVBAR_X, 0, CONSTANTS.NAVBAR_WIDTH, CONSTANTS.NAVBAR_HEIGHT, switchScreen);
         this._colourPalette = new ColourPalette(0, 0, CONSTANTS.NAVBAR_X, CONSTANTS.SCREEN_HEIGHT, "PALETTE");
-        this._inputsArea = new InputsArea(CONSTANTS.NAVBAR_X + CONSTANTS.NAVBAR_WIDTH, 0, CONSTANTS.NAVBAR_X, CONSTANTS.SCREEN_HEIGHT, "INPUTS");
+        this._inputsArea = new InputsArea(CONSTANTS.NAVBAR_X + CONSTANTS.NAVBAR_WIDTH, 0, CONSTANTS.NAVBAR_X, CONSTANTS.SCREEN_HEIGHT);
         this._layersList = new LayersList(CONSTANTS.SCREEN_WIDTH - CONSTANTS.NAVBAR_X * 2, CONSTANTS.NAVBAR_HEIGHT, CONSTANTS.NAVBAR_X, CONSTANTS.SCREEN_HEIGHT - CONSTANTS.NAVBAR_HEIGHT, "LAYERS");
         this._moduleCanvas = new ModuleCanvas(CONSTANTS.NAVBAR_X, CONSTANTS.NAVBAR_HEIGHT, CONSTANTS.NAVBAR_WIDTH - CONSTANTS.NAVBAR_X, CONSTANTS.SCREEN_HEIGHT - CONSTANTS.NAVBAR_HEIGHT, "CANVAS");
         this.modulesFromDatabase = [];
@@ -36,9 +36,13 @@ export default class ModuleBuilder extends Screen {
         this.addNewModule = addNewModule;
     }
 
-    setup = () => {
+    setup = (p5: P5) => {
         this.currentScreen = true;
         this._navbar.setup();
+        this._colourPalette.setup();
+        this._inputsArea.setup(p5);
+        this._layersList.setup();
+        this._moduleCanvas.setup();
         this.getModules(this.setModules);
     }
 
