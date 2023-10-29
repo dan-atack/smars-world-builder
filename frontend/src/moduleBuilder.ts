@@ -24,7 +24,7 @@ export default class ModuleBuilder extends Screen {
 
     constructor(switchScreen: (screen: string) => void) {
         super(switchScreen);
-        this._navbar = new Navbar(CONSTANTS.NAVBAR_X, 0, CONSTANTS.NAVBAR_WIDTH, CONSTANTS.NAVBAR_HEIGHT, "NAVBAR");
+        this._navbar = new Navbar(CONSTANTS.NAVBAR_X, 0, CONSTANTS.NAVBAR_WIDTH, CONSTANTS.NAVBAR_HEIGHT, switchScreen);
         this._colourPalette = new ColourPalette(0, 0, CONSTANTS.NAVBAR_X, CONSTANTS.SCREEN_HEIGHT, "PALETTE");
         this._inputsArea = new InputsArea(CONSTANTS.NAVBAR_X + CONSTANTS.NAVBAR_WIDTH, 0, CONSTANTS.NAVBAR_X, CONSTANTS.SCREEN_HEIGHT, "INPUTS");
         this._layersList = new LayersList(CONSTANTS.SCREEN_WIDTH - CONSTANTS.NAVBAR_X * 2, CONSTANTS.NAVBAR_HEIGHT, CONSTANTS.NAVBAR_X, CONSTANTS.SCREEN_HEIGHT - CONSTANTS.NAVBAR_HEIGHT, "LAYERS");
@@ -38,8 +38,13 @@ export default class ModuleBuilder extends Screen {
 
     setup = () => {
         this.currentScreen = true;
+        this._navbar.setup();
         this.getModules(this.setModules);
-        this.getOneModule("6505d7b4fa92111e5e312e22", this.setOneModule);
+    }
+
+    handleClick = (x: number, y: number) => {
+        // Send click data to subcomponents to activate their button handlers
+        this._navbar.handleClick(x, y);
     }
 
     setModules = (data?: [string, string][]) => {

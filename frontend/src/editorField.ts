@@ -1,5 +1,6 @@
 // The Editor Field class is a generic container for a group of related items in an editor screen
 import P5 from "p5";
+import Button from "./button";
 import { CONSTANTS } from "./constants";
 
 export default class EditorField {
@@ -9,15 +10,21 @@ export default class EditorField {
     _height: number;
     _width: number;
     _label: string; // Temporary?
-    _buttons: [];
+    _buttons: Button[];
 
     constructor(x: number, y: number, w: number, h: number, label?: string) {
         this._x = x;
         this._y = y;
         this._width = w;
         this._height = h;
-        this._label = label || "Generic\nField";
+        this._label = label || "";
         this._buttons = [];
+    }
+
+    handleClick = (mouseX: number, mouseY: number) => {
+        this._buttons.forEach((button) => {
+            button.handleClick(mouseX, mouseY);
+        })
     }
 
     render = (p5: P5) => {
@@ -28,5 +35,8 @@ export default class EditorField {
         p5.stroke(0);
         p5.textSize(48);
         p5.text(this._label, this._x + this._width / 2, this._y + 64);
+        this._buttons.forEach((button) => {
+            button.render(p5);
+        })
     }
 }

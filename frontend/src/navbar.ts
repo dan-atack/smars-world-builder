@@ -6,9 +6,36 @@ import EditorField from "./editorField";
 
 export default class Navbar extends EditorField{
     // Navbar types:
+    _buttonX: number;
+    _buttonY: number;
+    _buttonWidth: number;
+    _buttonHeight: number;
+    _buttonTextSize: number;
+    _buttonMargin: number;
+    switchScreen: (screen: string) => void;
 
-    constructor(x: number, y: number, w: number, h: number, label?: string) {
-        super(x, y, w, h, label);
+    constructor(x: number, y: number, w: number, h: number, switchScreen: (screen: string) => void) {
+        super(x, y, w, h);
+        this._buttonX = this._x + 8;
+        this._buttonY = this._y + 8;
+        this._buttonWidth = 216;
+        this._buttonHeight = 48;
+        this._buttonTextSize = 36;
+        this._buttonMargin = 16;
+        this.switchScreen = switchScreen;
+    }
+
+    // SECTION 0: SETUP
+
+    setup = () => {
+        const newButton = new Button("NEW", this._buttonX + this._buttonMargin, this._buttonY, this.handleNew, this._buttonWidth, this._buttonHeight, CONSTANTS.colors.GREEN_TERMINAL, CONSTANTS.colors.GREEN_BACKGROUND, this._buttonTextSize);
+        this._buttons.push(newButton);
+        const saveButton = new Button("SAVE", this._buttonX + this._buttonWidth + this._buttonMargin * 2, this._buttonY, this.handleSave, this._buttonWidth, this._buttonHeight, CONSTANTS.colors.GREEN_TERMINAL, CONSTANTS.colors.GREEN_BACKGROUND, this._buttonTextSize);
+        this._buttons.push(saveButton);
+        const loadButton = new Button("LOAD", this._buttonX + this._buttonWidth * 2 + this._buttonMargin * 3, this._buttonY, this.handleLoad, this._buttonWidth, this._buttonHeight, CONSTANTS.colors.GREEN_TERMINAL, CONSTANTS.colors.GREEN_BACKGROUND, this._buttonTextSize);
+        this._buttons.push(loadButton);
+        const menuButton = new Button("MENU", this._buttonX + this._buttonWidth * 3 + this._buttonMargin * 4, this._buttonY, this.handleMenu, this._buttonWidth, this._buttonHeight, CONSTANTS.colors.GREEN_TERMINAL, CONSTANTS.colors.GREEN_BACKGROUND, this._buttonTextSize);
+        this._buttons.push(menuButton);
     }
 
     // SECTION 1: BUTTON HANDLER METHODS

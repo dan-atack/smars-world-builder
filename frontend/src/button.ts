@@ -32,6 +32,19 @@ export default class Button {
         this.handler = handler;
     }
 
+    handleClick = (mouseX: number, mouseY: number) => {
+        // Establish that click is within button's borders:
+        const xMatch = mouseX >= this._x && mouseX < this._x + this._width;
+        const yMatch = mouseY >= this._y && mouseY < this._y + this._height;
+        if (xMatch && yMatch) {
+            this.handler();
+        }
+    }
+
+    setSelected = (selected: boolean) => {
+        this._selected = selected;
+    }
+
     render = (p5: P5) => {
         p5.strokeWeight(4);
         p5.stroke(0);
@@ -50,19 +63,6 @@ export default class Button {
         p5.fill(this._color);   // Text color
         p5.textAlign(p5.CENTER, p5.CENTER);
         p5.text(this._label, this._x + this._width / 2, this._y + this._height / 2);
-    }
-    
-    handleClick = (mouseX: number, mouseY: number) => {
-        // Establish that click is within button's borders:
-        const xMatch = mouseX >= this._x && mouseX < this._x + this._width;
-        const yMatch = mouseY >= this._y && mouseY < this._y + this._height;
-        if (xMatch && yMatch) {
-            this.handler();
-        }
-    }
-
-    setSelected = (selected: boolean) => {
-        this._selected = selected;
     }
 
 }
