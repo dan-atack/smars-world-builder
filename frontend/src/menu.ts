@@ -21,7 +21,7 @@ export default class Menu extends Screen {
         this._buttonX = CONSTANTS.SCREEN_WIDTH / 2 - this._buttonWidth / 2;
         this._buttonY = CONSTANTS.SCREEN_HEIGHT / 3;
         this._buttonText = CONSTANTS.colors.GREEN_TERMINAL;
-        this._buttonBG = CONSTANTS.colors.GREEN_BACKGROUND;
+        this._buttonBG = CONSTANTS.colors.GREEN_DARK;
         this.switchScreen = switchScreen;
     }
 

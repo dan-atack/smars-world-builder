@@ -54,7 +54,7 @@ export default class InputsArea extends EditorField{
         this._columnStrength = null;
         this._durability = null;
         this._cost = null;
-        this._pressurized = new Button("P", this._x + 8, 400, this.handlePressurized, 32, 32, CONSTANTS.colors.GREEN_TERMINAL, CONSTANTS.colors.GREEN_BACKGROUND, 20, "ellipse");
+        this._pressurized = new Button("P", this._x + 8, 400, this.handlePressurized, 32, 32, CONSTANTS.colors.GREEN_TERMINAL, CONSTANTS.colors.GREEN_DARK, 20, "ellipse");
         this.setModuleData = setModuleData;
     }
 

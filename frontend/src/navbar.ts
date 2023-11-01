@@ -28,13 +28,13 @@ export default class Navbar extends EditorField{
     // SECTION 0: SETUP
 
     setup = () => {
-        const newButton = new Button("NEW", this._buttonX + this._buttonMargin, this._buttonY, this.handleNew, this._buttonWidth, this._buttonHeight, CONSTANTS.colors.GREEN_TERMINAL, CONSTANTS.colors.GREEN_BACKGROUND, this._buttonTextSize);
+        const newButton = new Button("NEW", this._buttonX + this._buttonMargin, this._buttonY, this.handleNew, this._buttonWidth, this._buttonHeight, CONSTANTS.colors.GREEN_TERMINAL, CONSTANTS.colors.GREEN_DARK, this._buttonTextSize);
         this._buttons.push(newButton);
-        const saveButton = new Button("SAVE", this._buttonX + this._buttonWidth + this._buttonMargin * 2, this._buttonY, this.handleSave, this._buttonWidth, this._buttonHeight, CONSTANTS.colors.GREEN_TERMINAL, CONSTANTS.colors.GREEN_BACKGROUND, this._buttonTextSize);
+        const saveButton = new Button("SAVE", this._buttonX + this._buttonWidth + this._buttonMargin * 2, this._buttonY, this.handleSave, this._buttonWidth, this._buttonHeight, CONSTANTS.colors.GREEN_TERMINAL, CONSTANTS.colors.GREEN_DARK, this._buttonTextSize);
         this._buttons.push(saveButton);
-        const loadButton = new Button("LOAD", this._buttonX + this._buttonWidth * 2 + this._buttonMargin * 3, this._buttonY, this.handleLoad, this._buttonWidth, this._buttonHeight, CONSTANTS.colors.GREEN_TERMINAL, CONSTANTS.colors.GREEN_BACKGROUND, this._buttonTextSize);
+        const loadButton = new Button("LOAD", this._buttonX + this._buttonWidth * 2 + this._buttonMargin * 3, this._buttonY, this.handleLoad, this._buttonWidth, this._buttonHeight, CONSTANTS.colors.GREEN_TERMINAL, CONSTANTS.colors.GREEN_DARK, this._buttonTextSize);
         this._buttons.push(loadButton);
-        const menuButton = new Button("MENU", this._buttonX + this._buttonWidth * 3 + this._buttonMargin * 4, this._buttonY, this.handleMenu, this._buttonWidth, this._buttonHeight, CONSTANTS.colors.GREEN_TERMINAL, CONSTANTS.colors.GREEN_BACKGROUND, this._buttonTextSize);
+        const menuButton = new Button("MENU", this._buttonX + this._buttonWidth * 3 + this._buttonMargin * 4, this._buttonY, this.handleMenu, this._buttonWidth, this._buttonHeight, CONSTANTS.colors.GREEN_TERMINAL, CONSTANTS.colors.GREEN_DARK, this._buttonTextSize);
         this._buttons.push(menuButton);
     }
 

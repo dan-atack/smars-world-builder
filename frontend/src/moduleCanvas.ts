@@ -37,7 +37,7 @@ export default class ModuleCanvas extends EditorField{
     }
 
     render = (p5: P5) => {
-        p5.fill(CONSTANTS.colors.GREEN_BACKGROUND);
+        p5.fill(CONSTANTS.colors.GREEN_DARK);
         p5.rect(this._x + this._topMargin, this._y + this._leftMargin, this._moduleWidth * this._smarsModuleWidth * this._scale, this._moduleHeight * this._smarsModuleWidth * this._scale);
     }
 
