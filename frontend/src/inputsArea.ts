@@ -17,8 +17,9 @@ export default class InputsArea extends EditorField{
     _durability: P5.Element | null;
     _cost: P5.Element | null;               // This one will take a number and convert it into a resource (e.g. ["money", 500])
     _pressurized: Button;                   // Boolean value inputs will have custom-made buttons instead
+    setModuleData: (data: ModuleInfo) => void;  // Updater function passed down by the parent (ModuleBuilder) class
 
-    constructor(x: number, y: number, w: number, h: number) {
+    constructor(x: number, y: number, w: number, h: number, setModuleData: (data: ModuleInfo) => void) {
         super(x, y, w, h);
         this._data = {          // Basic empty module data template
             name: "",
@@ -54,6 +55,7 @@ export default class InputsArea extends EditorField{
         this._durability = null;
         this._cost = null;
         this._pressurized = new Button("P", this._x + 8, 400, this.handlePressurized, 32, 32, CONSTANTS.colors.GREEN_TERMINAL, CONSTANTS.colors.GREEN_BACKGROUND, 20, "ellipse");
+        this.setModuleData = setModuleData;
     }
 
     setup = (p5: P5) => {
@@ -91,7 +93,7 @@ export default class InputsArea extends EditorField{
         if (this._columnStrength?.value()) this._data.columnStrength = Number(this._columnStrength.value() as string);
         if (this._durability?.value()) this._data.durability = Number(this._durability.value() as string);
         if (this._cost?.value()) this._data.buildCosts = [["money", Number(this._cost.value() as string)]];
-        console.log(this._data);
+        this.setModuleData(this._data); // Pass updated value to the module builder screen
     }
 
     // SECTION 2: BUTTON HANDLER METHODS
@@ -114,11 +116,15 @@ export default class InputsArea extends EditorField{
             p5.text(label, this._x + 4, this._y + 100 + idx * 38);
         })
         p5.stroke(0);
-        p5.textSize(36);
-        p5.text(this._label, this._x + this._width / 2, this._y + 32);
         this._buttons.forEach((button) => {
             button.render(p5);
         });
+        p5.textAlign(p5.CENTER);
+        p5.textSize(20);
+        p5.text("Maintenance", this._x + this._width / 2, 360);
+        p5.text("Storage", this._x + this._width / 2, 420);
+        p5.text("Inputs", this._x + this._width / 2, 480);
+        p5.text("Outputs", this._x + this._width / 2, 540);
     }
 
 }

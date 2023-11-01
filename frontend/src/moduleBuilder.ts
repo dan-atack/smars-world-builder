@@ -11,6 +11,7 @@ import { getModules, getOneModule, addNewModule } from "./server_functions";
 
 export default class ModuleBuilder extends Screen {
     // Module Builder class types:
+    _data: ModuleInfo;                      // The data object for the module being designed
     _navbar: Navbar;
     _colourPalette: ColourPalette;
     _inputsArea: InputsArea;
@@ -24,9 +25,25 @@ export default class ModuleBuilder extends Screen {
 
     constructor(switchScreen: (screen: string) => void) {
         super(switchScreen);
+        this._data = {          // Basic empty module data template
+            name: "",
+            width: 1,
+            height: 1,
+            type: "Test",
+            pressurized: false,
+            columnStrength: 0,
+            durability: 100,
+            buildCosts: [["money", 100]],
+            maintenanceCosts: [],
+            productionInputs: [],
+            productionOutputs: [],
+            storageCapacity: [],
+            crewCapacity: 0,
+            shapes: []
+        };
         this._navbar = new Navbar(CONSTANTS.NAVBAR_X, 0, CONSTANTS.NAVBAR_WIDTH, CONSTANTS.NAVBAR_HEIGHT, switchScreen);
         this._colourPalette = new ColourPalette(0, 0, CONSTANTS.NAVBAR_X, CONSTANTS.SCREEN_HEIGHT, "PALETTE");
-        this._inputsArea = new InputsArea(CONSTANTS.NAVBAR_X + CONSTANTS.NAVBAR_WIDTH, 0, CONSTANTS.NAVBAR_X, CONSTANTS.SCREEN_HEIGHT);
+        this._inputsArea = new InputsArea(CONSTANTS.NAVBAR_X + CONSTANTS.NAVBAR_WIDTH, 0, CONSTANTS.NAVBAR_X, CONSTANTS.SCREEN_HEIGHT, this.setModuleData);
         this._layersList = new LayersList(CONSTANTS.SCREEN_WIDTH - CONSTANTS.NAVBAR_X * 2, CONSTANTS.NAVBAR_HEIGHT, CONSTANTS.NAVBAR_X, CONSTANTS.SCREEN_HEIGHT - CONSTANTS.NAVBAR_HEIGHT, "LAYERS");
         this._moduleCanvas = new ModuleCanvas(CONSTANTS.NAVBAR_X, CONSTANTS.NAVBAR_HEIGHT, CONSTANTS.NAVBAR_WIDTH - CONSTANTS.NAVBAR_X, CONSTANTS.SCREEN_HEIGHT - CONSTANTS.NAVBAR_HEIGHT, "CANVAS");
         this.modulesFromDatabase = [];
@@ -35,6 +52,8 @@ export default class ModuleBuilder extends Screen {
         this.getOneModule = getOneModule;
         this.addNewModule = addNewModule;
     }
+
+    // SECTION 1: Basic Setup and updater methods
 
     setup = (p5: P5) => {
         this.currentScreen = true;
@@ -46,10 +65,20 @@ export default class ModuleBuilder extends Screen {
         this.getModules(this.setModules);
     }
 
+    // Updates the module data whenever a change is detected from any of the editor's sub-components
+    setModuleData = (data: ModuleInfo) => {
+        this._data = data;
+        console.log(this._data);
+    }
+
+    // SECTION 2: Click Handlers
+
     handleClick = (x: number, y: number) => {
         // Send click data to subcomponents to activate their button handlers
         this._navbar.handleClick(x, y);
     }
+
+    // SECTION 3: Module Data Loading methods
 
     setModules = (data?: [string, string][]) => {
         if (data) {
