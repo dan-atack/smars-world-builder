@@ -68,7 +68,8 @@ export default class ModuleBuilder extends Screen {
     // Updates the module data whenever a change is detected from any of the editor's sub-components
     setModuleData = (data: ModuleInfo) => {
         this._data = data;
-        console.log(this._data);
+        // Propagate change to the canvas if width or height are affected
+        this._moduleCanvas.updateCanvas(data.width, data.height);
     }
 
     // SECTION 2: Click Handlers
