@@ -15,8 +15,8 @@ export default class ColourPalette extends EditorField {
     constructor(x: number, y: number, w: number, h: number, setColour: (colour: string) => void) {
         super(x, y, w, h);
         this._optionWidth = 40;
-        this._optionMargin = 30;
-        this._optionsPerRow = 4;
+        this._optionMargin = 15;
+        this._optionsPerRow = 5;
         this.currentColour = "#000000";     // Black is selected by default
         this.setModuleBuilderColour = setColour;
     }

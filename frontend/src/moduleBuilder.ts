@@ -21,6 +21,8 @@ export default class ModuleBuilder extends Screen {
     _shapeSelector: ShapeSelector;
     _currentColour: string;
     _currentShape: string;
+    _mouseContext: string;  // Used to keep track of which shape (if any) is being created
+    _mouseClicks: number;   // Used to keep track of the number of clicks that have occurred in a shape placement sequence
     modulesFromDatabase: [string, string][];
     loadedModule: ModuleInfo | null;
     getModules: (setter: (data?: []) => void) => void;
@@ -53,6 +55,8 @@ export default class ModuleBuilder extends Screen {
         this._shapeSelector = new ShapeSelector(CONSTANTS.NAVBAR_X, CONSTANTS.SCREEN_HEIGHT - CONSTANTS.NAVBAR_HEIGHT, CONSTANTS.NAVBAR_WIDTH - CONSTANTS.NAVBAR_X, CONSTANTS.NAVBAR_HEIGHT, this.setShape);
         this._currentColour = "#000000";        // Black by default
         this._currentShape = "";                // No shape by default
+        this._mouseContext = "default";         // Default to regular mouse context (no shape placement)
+        this._mouseClicks = 0;                  // Only keep track of mouse clicks during shape placement
         this.modulesFromDatabase = [];
         this.loadedModule = null;               // By default no module is loaded
         this.getModules = getModules;
@@ -60,7 +64,7 @@ export default class ModuleBuilder extends Screen {
         this.addNewModule = addNewModule;
     }
 
-    // SECTION 1: Basic Setup and updater methods
+    // SECTION 1: Basic Setup
 
     setup = (p5: P5) => {
         this.currentScreen = true;
@@ -72,6 +76,8 @@ export default class ModuleBuilder extends Screen {
         this._shapeSelector.setup();
         this.getModules(this.setModules);
     }
+
+    // SECTION 2: Updater Methods (Passed down to subcomponents)
 
     // Updates the module data whenever a change is detected from any of the editor's sub-components
     setModuleData = (data: ModuleInfo) => {
@@ -86,21 +92,76 @@ export default class ModuleBuilder extends Screen {
         console.log(this._currentColour);
     }
 
-    // Sets the shape about to be rendered in the canvas area
+    // Sets the shape about to be rendered in the canvas area, and sets mouse context
     setShape = (shape: string) => {
-        console.log(shape);
+        console.log(`SEtting shape: ${shape}`);
+        this._currentShape = shape;
+        const context: string = `place-${shape}`;
+        this.setMouseContext(context);
     }
 
-    // SECTION 2: Click Handlers
+    // SECTION 3: Click Handlers & Mouse Context
 
     handleClick = (x: number, y: number) => {
-        // Send click data to subcomponents to activate their button handlers
-        this._navbar.handleClick(x, y);
-        this._colourPalette.handleClick(x, y);
-        this._shapeSelector.handleClick(x, y);
+        // If mouse context is for shape placement, run shape placement methods
+        switch (this._mouseContext) {
+            case "place-rect":
+                this.handleRectPlacement();
+                break;
+            case "place-quad":
+                this.handleQuadPlacement();
+                break;
+            case "place-triangle":
+                this.handleTrianglePlacement();
+                break;
+            case "place-ellipse":
+                this.handleEllipsePlacement();
+                break;
+            case "place-arc":
+                this.handleArcPlacement();
+                break;
+            case "default":
+                // Do nothing extra
+                break;
+            default:
+                console.log(`ERROR: Unrecognized mouse context: ${this._mouseContext}`);
+                this._mouseContext = "default";
+        }
+         // Next, check if any of the side panels have been clicked, and activate their button handlers
+         this._shapeSelector.handleClick(x, y);
+         this._navbar.handleClick(x, y);
+         this._colourPalette.handleClick(x, y);
     }
 
-    // SECTION 3: Module Data Loading methods
+    // Sets the context and resets the click counter
+    setMouseContext = (context: string) => {
+        this._mouseContext = context;
+        this._mouseClicks = 0;      // Reset
+    }
+
+    // SECTION 4: Shape placement methods (top-level)
+
+    handleRectPlacement = () => {
+
+    }
+
+    handleQuadPlacement = () => {
+
+    }
+
+    handleTrianglePlacement = () => {
+
+    }
+
+    handleEllipsePlacement = () => {
+
+    }
+
+    handleArcPlacement = () => {
+
+    }
+
+    // SECTION 4: Module Data Loading methods
 
     setModules = (data?: [string, string][]) => {
         if (data) {

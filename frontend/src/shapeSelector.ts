@@ -12,7 +12,7 @@ export default class ShapeSelector extends EditorField {
     _buttonMargin: number;
     _buttonWidth: number;
     _buttonColour: string;
-    _setShape: (shape: string) => void; // Passed down from the Module Builder class
+    setShape: (shape: string) => void; // Passed down from the Module Builder class
 
     constructor(x: number, y: number, w: number, h: number, setShape: (shape: string) => void) {
         super(x, y, w, h);
@@ -22,7 +22,7 @@ export default class ShapeSelector extends EditorField {
         this._buttonMargin = 60;
         this._buttonWidth = 60;
         this._buttonColour = CONSTANTS.colors.GREEN_LEAVES;
-        this._setShape = setShape;
+        this.setShape = setShape;
     }
 
     setup = () => {
@@ -39,23 +39,23 @@ export default class ShapeSelector extends EditorField {
     }
 
     handleRect = () => {
-        console.log("get rect scrub");
+        this.setShape("rect");
     }
 
     handleQuad = () => {
-        console.log("quad errat demonstrandum, scrub");
+        this.setShape("quad");
     }
 
     handleTriangle = () => {
-        console.log("it's a LOVE triangle");
+        this.setShape("triangle");
     }
 
     handleEllipse = () => {
-        console.log("it's come full circle");
+        this.setShape("ellipse");
     }
 
     handleArc = () => {
-        console.log("the arc of history bends towards getting wrecked");
+        this.setShape("arc");
     }
 
     render = (p5: P5) => {

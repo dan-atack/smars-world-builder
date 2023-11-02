@@ -26,6 +26,9 @@ export default class ModuleCanvas extends EditorField {
         this._buttons = [];
     }
 
+    // SECTION 1: Canvas dimensions updater
+
+    // Increases/decreases the canvas in either vertical or horizontal direction
     updateCanvas = (w: number, h: number) => {
         this._moduleWidth = w;
         this._moduleHeight = h;
@@ -35,6 +38,8 @@ export default class ModuleCanvas extends EditorField {
             this._scale = 3;
         }
     }
+
+    // SECTION 2: Shape creator methods
 
     render = (p5: P5) => {
         p5.fill("#0F0F0F");
