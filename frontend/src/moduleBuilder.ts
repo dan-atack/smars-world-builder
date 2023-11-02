@@ -6,6 +6,7 @@ import ColourPalette from "./colourPalette";
 import InputsArea from "./inputsArea";
 import LayersList from "./layersList";
 import ModuleCanvas from "./moduleCanvas";
+import ShapeSelector from "./shapeSelector";
 import { CONSTANTS, ModuleInfo } from "./constants";
 import { getModules, getOneModule, addNewModule } from "./server_functions";
 
@@ -17,6 +18,9 @@ export default class ModuleBuilder extends Screen {
     _inputsArea: InputsArea;
     _layersList: LayersList;
     _moduleCanvas: ModuleCanvas;
+    _shapeSelector: ShapeSelector;
+    _currentColour: string;
+    _currentShape: string;
     modulesFromDatabase: [string, string][];
     loadedModule: ModuleInfo | null;
     getModules: (setter: (data?: []) => void) => void;
@@ -42,12 +46,15 @@ export default class ModuleBuilder extends Screen {
             shapes: []
         };
         this._navbar = new Navbar(CONSTANTS.NAVBAR_X, 0, CONSTANTS.NAVBAR_WIDTH, CONSTANTS.NAVBAR_HEIGHT, switchScreen);
-        this._colourPalette = new ColourPalette(0, 0, CONSTANTS.NAVBAR_X, CONSTANTS.SCREEN_HEIGHT, "PALETTE");
+        this._colourPalette = new ColourPalette(0, 0, CONSTANTS.NAVBAR_X, CONSTANTS.SCREEN_HEIGHT, this.setColour);
         this._inputsArea = new InputsArea(CONSTANTS.NAVBAR_X + CONSTANTS.NAVBAR_WIDTH, 0, CONSTANTS.NAVBAR_X, CONSTANTS.SCREEN_HEIGHT, this.setModuleData);
         this._layersList = new LayersList(CONSTANTS.SCREEN_WIDTH - CONSTANTS.NAVBAR_X * 2, CONSTANTS.NAVBAR_HEIGHT, CONSTANTS.NAVBAR_X, CONSTANTS.SCREEN_HEIGHT - CONSTANTS.NAVBAR_HEIGHT, "LAYERS");
         this._moduleCanvas = new ModuleCanvas(CONSTANTS.NAVBAR_X, CONSTANTS.NAVBAR_HEIGHT, CONSTANTS.NAVBAR_WIDTH - CONSTANTS.NAVBAR_X, CONSTANTS.SCREEN_HEIGHT - CONSTANTS.NAVBAR_HEIGHT, "CANVAS");
+        this._shapeSelector = new ShapeSelector(CONSTANTS.NAVBAR_X, CONSTANTS.SCREEN_HEIGHT - CONSTANTS.NAVBAR_HEIGHT, CONSTANTS.NAVBAR_WIDTH - CONSTANTS.NAVBAR_X, CONSTANTS.NAVBAR_HEIGHT, this.setShape);
+        this._currentColour = "#000000";        // Black by default
+        this._currentShape = "";                // No shape by default
         this.modulesFromDatabase = [];
-        this.loadedModule = null;           // By default no module is loaded
+        this.loadedModule = null;               // By default no module is loaded
         this.getModules = getModules;
         this.getOneModule = getOneModule;
         this.addNewModule = addNewModule;
@@ -62,6 +69,7 @@ export default class ModuleBuilder extends Screen {
         this._inputsArea.setup(p5);
         this._layersList.setup();
         this._moduleCanvas.setup();
+        this._shapeSelector.setup();
         this.getModules(this.setModules);
     }
 
@@ -72,11 +80,24 @@ export default class ModuleBuilder extends Screen {
         this._moduleCanvas.updateCanvas(data.width, data.height);
     }
 
+    // Takes the current colour from the colour palette component
+    setColour = (colour: string) => {
+        this._currentColour = colour;
+        console.log(this._currentColour);
+    }
+
+    // Sets the shape about to be rendered in the canvas area
+    setShape = (shape: string) => {
+        console.log(shape);
+    }
+
     // SECTION 2: Click Handlers
 
     handleClick = (x: number, y: number) => {
         // Send click data to subcomponents to activate their button handlers
         this._navbar.handleClick(x, y);
+        this._colourPalette.handleClick(x, y);
+        this._shapeSelector.handleClick(x, y);
     }
 
     // SECTION 3: Module Data Loading methods
@@ -104,6 +125,7 @@ export default class ModuleBuilder extends Screen {
         this._inputsArea.render(p5);
         this._layersList.render(p5);
         this._moduleCanvas.render(p5);
+        this._shapeSelector.render(p5);
     }
 
 }

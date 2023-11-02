@@ -4,7 +4,7 @@ import Button from "./button";
 import { CONSTANTS } from "./constants";
 import EditorField from "./editorField";
 
-export default class Navbar extends EditorField{
+export default class Navbar extends EditorField {
     // Navbar types:
     _buttonX: number;
     _buttonY: number;

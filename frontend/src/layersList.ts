@@ -3,7 +3,7 @@ import P5 from "p5";
 import { CONSTANTS } from "./constants";
 import EditorField from "./editorField";
 
-export default class LayersList extends EditorField{
+export default class LayersList extends EditorField {
     // Layers List types:
 
     constructor(x: number, y: number, w: number, h: number, label?: string) {

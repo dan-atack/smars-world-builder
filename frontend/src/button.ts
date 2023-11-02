@@ -55,7 +55,25 @@ export default class Button {
         }
         p5.fill(this._bgColor);    // Button BG color
         // TODO: Impement switch case to render buttons with different shapes
-        p5.rect(this._x, this._y, this._width, this._height, 8, 8, 8, 8);
+        switch (this._shape) {
+            case "rect":
+                p5.rect(this._x, this._y, this._width, this._height);
+                break;
+            case "quad":
+                p5.quad(this._x, this._y, this._x + this._width, this._y, this._x + this._width * 3 / 4, this._y + this._height, this._x + this._width / 4, this._y + this._height);
+                break;
+            case "triangle":
+                p5.triangle(this._x + this._width / 2, this._y, this._x, this._y + this._height, this._x + this._width, this._y + this._height);
+                break;
+            case "ellipse":
+                p5.ellipse(this._x + this._width / 2, this._y + this._height / 2, this._width, this._height);
+                break;
+            case "arc":
+                p5.arc(this._x + this._width / 2, this._y + this._height * 1 / 4, this._width, this._height, 0, 3.14);
+                break;
+            default:
+                p5.rect(this._x, this._y, this._width, this._height, 8, 8, 8, 8);
+        }
         p5.strokeWeight(2); // Reset stroke weight before button text is rendered
         p5.stroke(0);
         p5.textSize(this._fontSize);

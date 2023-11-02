@@ -4,7 +4,7 @@ import { CONSTANTS, ModuleInfo } from "./constants";
 import EditorField from "./editorField";
 import Button from "./button";
 
-export default class InputsArea extends EditorField{
+export default class InputsArea extends EditorField {
     _data: ModuleInfo;                      // The data object for the module being designed
     // Input fields:
     _inputs: P5.Element[];                  // Top-level input list; used to efficiently track changes to any text input field
@@ -122,9 +122,9 @@ export default class InputsArea extends EditorField{
         p5.textAlign(p5.CENTER);
         p5.textSize(20);
         p5.text("Maintenance", this._x + this._width / 2, 360);
-        p5.text("Storage", this._x + this._width / 2, 420);
-        p5.text("Inputs", this._x + this._width / 2, 480);
-        p5.text("Outputs", this._x + this._width / 2, 540);
+        p5.text("Storage", this._x + this._width / 2, 460);
+        p5.text("Inputs", this._x + this._width / 2, 560);
+        p5.text("Outputs", this._x + this._width / 2, 660);
     }
 
 }

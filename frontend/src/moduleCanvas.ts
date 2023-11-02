@@ -3,7 +3,7 @@ import P5 from "p5";
 import { CONSTANTS } from "./constants";
 import EditorField from "./editorField";
 
-export default class ModuleCanvas extends EditorField{
+export default class ModuleCanvas extends EditorField {
     // Module Canvas types:
     _topMargin: number;     // Margins are in terms of pixels
     _leftMargin: number;
@@ -37,6 +37,9 @@ export default class ModuleCanvas extends EditorField{
     }
 
     render = (p5: P5) => {
+        p5.fill("#0F0F0F");
+        p5.stroke("green");
+        p5.rect(this._x, this._y, this._width, this._height, 4, 4, 4, 4);
         p5.fill(CONSTANTS.colors.GREEN_DARK);
         p5.rect(this._x + this._topMargin, this._y + this._leftMargin, this._moduleWidth * this._smarsModuleWidth * this._scale, this._moduleHeight * this._smarsModuleWidth * this._scale);
     }
