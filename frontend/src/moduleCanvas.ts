@@ -1,6 +1,6 @@
 // The Module Canvas is the sub-component of the ModuleBuilder class on which the user 'paints' the shapes for a new module
 import P5 from "p5";
-import { CONSTANTS, ModuleInfo } from "./constants";
+import { CONSTANTS, ModuleInfo, Shape } from "./constants";
 import EditorField from "./editorField";
 
 export default class ModuleCanvas extends EditorField {
@@ -11,12 +11,7 @@ export default class ModuleCanvas extends EditorField {
     _moduleHeight: number;
     _scale: number;         // Ratio of pixels in the canvas to the real size of the module being painted (> 1 = canvas is blown up)
     _smarsModuleWidth;      // From SMARS' frontend constants; used to translate module w/h values to editor screen pixels
-    _currentlyDrawing: {
-        shape: string,          // Options are "rect", "quad", "triangle", "ellipse" and "arc"
-        color: string,          // Hex codes only, please
-        params: number[]        // The arguments for creating the shape - Values are all in terms of GRID SPACES, not pixels!!
-        mode?: string           // For optional non-numeric arguments to arc shapes
-    } | null;
+    _currentlyDrawing: Shape | null;
 
     constructor(x: number, y: number, w: number, h: number, label?: string) {
         super(x, y, w, h, label);
@@ -75,13 +70,15 @@ export default class ModuleCanvas extends EditorField {
     handleRect = (click: number, mouseX: number, mouseY: number) => {
         switch (click) {
             case 0:
+                // TODO: Convert pixel location to grid location
                 console.log(`(${mouseX}, ${mouseY})`);
-                break;
+                return null;        // If the shape isn't ready yet, return a null
             case 1:
                 console.log(`(${mouseX}, ${mouseY})`);
                 return this._currentlyDrawing;
             default:
                 console.log("ERROR: Too many clicks... Or were you trying to round the corners?");
+                return null;        // If the click number is invalid return null
         }
     }
 

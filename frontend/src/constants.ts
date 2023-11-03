@@ -3,6 +3,14 @@
 // Copied from smars' frontend economyData.ts file
 export type Resource = [ string, number ];
 
+// For convenience
+export type Shape = {
+    shape: string,          // Options are "rect", "quad", "triangle", "ellipse" and "arc"
+    color: string,          // Hex codes only, please
+    params: number[]        // The arguments for creating the shape - Values are all in terms of GRID SPACES, not pixels!!
+    mode?: string           // For optional non-numeric arguments to arc shapes
+}
+
 // Copied from smars' frontend server_functions.ts file
 export type ModuleInfo = {
     name: string            // Unique name of the module; First Letters Capitalized
@@ -18,12 +26,7 @@ export type ModuleInfo = {
     productionOutputs?: Resource[]  // For production modules only, the output from a single batch of work
     storageCapacity: Resource[]   // A list of the amount of each type of resource (if any) that can be stored in this module
     crewCapacity: number    // How many humans can fit into a phone booth??
-    shapes: {
-        shape: string,          // Options are "rect", "quad", "triangle", "ellipse" and "arc"
-        color: string,          // Hex codes only, please
-        params: number[]        // The arguments for creating the shape - Values are all in terms of GRID SPACES, not pixels!!
-        mode?: string           // For optional non-numeric arguments to arc shapes
-    }[]
+    shapes: Shape[]
 };
 
 export const CONSTANTS = {
