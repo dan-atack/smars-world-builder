@@ -1,6 +1,6 @@
 // The Module Canvas is the sub-component of the ModuleBuilder class on which the user 'paints' the shapes for a new module
 import P5 from "p5";
-import { CONSTANTS } from "./constants";
+import { CONSTANTS, ModuleInfo } from "./constants";
 import EditorField from "./editorField";
 
 export default class ModuleCanvas extends EditorField {
@@ -11,6 +11,12 @@ export default class ModuleCanvas extends EditorField {
     _moduleHeight: number;
     _scale: number;         // Ratio of pixels in the canvas to the real size of the module being painted (> 1 = canvas is blown up)
     _smarsModuleWidth;      // From SMARS' frontend constants; used to translate module w/h values to editor screen pixels
+    _currentlyDrawing: {
+        shape: string,          // Options are "rect", "quad", "triangle", "ellipse" and "arc"
+        color: string,          // Hex codes only, please
+        params: number[]        // The arguments for creating the shape - Values are all in terms of GRID SPACES, not pixels!!
+        mode?: string           // For optional non-numeric arguments to arc shapes
+    } | null;
 
     constructor(x: number, y: number, w: number, h: number, label?: string) {
         super(x, y, w, h, label);
@@ -20,6 +26,7 @@ export default class ModuleCanvas extends EditorField {
         this._moduleHeight = 1;
         this._scale = 3;                    // Scale starts at 3x magnification, but will decrease if the user requests a very large module
         this._smarsModuleWidth = 20;        // Taken from SMARS repo: frontend/src/constants.ts
+        this._currentlyDrawing = null;      // By default, no shapes are being drawn
     }
 
     setup = () => {
@@ -29,7 +36,7 @@ export default class ModuleCanvas extends EditorField {
     // SECTION 1: Canvas dimensions updater
 
     // Increases/decreases the canvas in either vertical or horizontal direction
-    updateCanvas = (w: number, h: number) => {
+    updateCanvasSize = (w: number, h: number) => {
         this._moduleWidth = w;
         this._moduleHeight = h;
         if (this._moduleWidth > 10 || this._moduleHeight > 10) {      // TODO: Complete the thought here by making a switch case and setting limits
@@ -39,7 +46,65 @@ export default class ModuleCanvas extends EditorField {
         }
     }
 
-    // SECTION 2: Shape creator methods
+    // SECTION 2: Click Handlers for shape creation
+    handleClick = (mouseX: number, mouseY: number) => {
+        if (this._currentlyDrawing !== null) {
+            switch (this._currentlyDrawing.shape) {
+                case
+                 "rect":
+                    console.log("Drawing rect");
+                    break;
+                case "quad":
+                    console.log("Drawing quad");
+                    break;
+                case "triangle":
+                    console.log("Drawing triangle");
+                    break;
+                case "ellipse":
+                    console.log("Drawing ellipse");
+                    break;
+                case "arc":
+                    console.log("Drawing arc");
+                    break;
+                default:
+                    console.log(`ERROR: Unrecognized shape requested: ${this._currentlyDrawing.shape}`);
+            }
+        }
+    }
+
+    handleRect = (click: number, mouseX: number, mouseY: number) => {
+        switch (click) {
+            case 0:
+                console.log(`(${mouseX}, ${mouseY})`);
+                break;
+            case 1:
+                console.log(`(${mouseX}, ${mouseY})`);
+                return this._currentlyDrawing;
+            default:
+                console.log("ERROR: Too many clicks... Or were you trying to round the corners?");
+        }
+    }
+
+    // SECTION 3: Shape Creation methods
+
+    // Called by the ModuleBuilder class when the user selects a shape from the (aptly named) shape selector panel; creates a new shape template
+    setCurrentShape = (shape: string, color: string) => {
+        this._currentlyDrawing = {      // Create a new shape object, and give it the name and shape from the parent class
+            shape: shape,
+            color: color,
+            params: []
+        }
+    }
+
+    renderRectPlacement = (p5: P5, mouseX: number, mouseY: number, clickNumber: number) => {
+        switch (clickNumber) {
+            case 0:
+                break;
+        }
+        // Follow the mouse cursor with a green circle
+        p5.fill(CONSTANTS.colors.GREEN_TERMINAL);
+        p5.ellipse(mouseX, mouseY, 8);
+    }
 
     render = (p5: P5) => {
         p5.fill("#0F0F0F");

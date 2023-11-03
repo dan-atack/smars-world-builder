@@ -51,7 +51,7 @@ export default class ModuleBuilder extends Screen {
         this._colourPalette = new ColourPalette(0, 0, CONSTANTS.NAVBAR_X, CONSTANTS.SCREEN_HEIGHT, this.setColour);
         this._inputsArea = new InputsArea(CONSTANTS.NAVBAR_X + CONSTANTS.NAVBAR_WIDTH, 0, CONSTANTS.NAVBAR_X, CONSTANTS.SCREEN_HEIGHT, this.setModuleData);
         this._layersList = new LayersList(CONSTANTS.SCREEN_WIDTH - CONSTANTS.NAVBAR_X * 2, CONSTANTS.NAVBAR_HEIGHT, CONSTANTS.NAVBAR_X, CONSTANTS.SCREEN_HEIGHT - CONSTANTS.NAVBAR_HEIGHT, "LAYERS");
-        this._moduleCanvas = new ModuleCanvas(CONSTANTS.NAVBAR_X, CONSTANTS.NAVBAR_HEIGHT, CONSTANTS.NAVBAR_WIDTH - CONSTANTS.NAVBAR_X, CONSTANTS.SCREEN_HEIGHT - CONSTANTS.NAVBAR_HEIGHT, "CANVAS");
+        this._moduleCanvas = new ModuleCanvas(CONSTANTS.NAVBAR_X, CONSTANTS.NAVBAR_HEIGHT, CONSTANTS.NAVBAR_WIDTH - CONSTANTS.NAVBAR_X, CONSTANTS.SCREEN_HEIGHT - CONSTANTS.NAVBAR_HEIGHT * 2, "CANVAS");
         this._shapeSelector = new ShapeSelector(CONSTANTS.NAVBAR_X, CONSTANTS.SCREEN_HEIGHT - CONSTANTS.NAVBAR_HEIGHT, CONSTANTS.NAVBAR_WIDTH - CONSTANTS.NAVBAR_X, CONSTANTS.NAVBAR_HEIGHT, this.setShape);
         this._currentColour = "#000000";        // Black by default
         this._currentShape = "";                // No shape by default
@@ -83,7 +83,7 @@ export default class ModuleBuilder extends Screen {
     setModuleData = (data: ModuleInfo) => {
         this._data = data;
         // Propagate change to the canvas if width or height are affected
-        this._moduleCanvas.updateCanvas(data.width, data.height);
+        this._moduleCanvas.updateCanvasSize(data.width, data.height);
     }
 
     // Takes the current colour from the colour palette component
@@ -94,43 +94,55 @@ export default class ModuleBuilder extends Screen {
 
     // Sets the shape about to be rendered in the canvas area, and sets mouse context
     setShape = (shape: string) => {
-        console.log(`SEtting shape: ${shape}`);
+        console.log(`Setting shape: ${shape}`);
         this._currentShape = shape;
         const context: string = `place-${shape}`;
         this.setMouseContext(context);
+        this._moduleCanvas.setCurrentShape(this._currentShape, this._colourPalette.currentColour);  // Pass the shape and colour to the module canvas component
+    }
+
+    // Cancels the current shape selection
+    resetShape = () => {
+        this._currentShape = "";
+        this._mouseContext = "default";
+        this._mouseClicks = 0;
     }
 
     // SECTION 3: Click Handlers & Mouse Context
 
     handleClick = (x: number, y: number) => {
         // If mouse context is for shape placement, run shape placement methods
-        switch (this._mouseContext) {
-            case "place-rect":
-                this.handleRectPlacement();
-                break;
-            case "place-quad":
-                this.handleQuadPlacement();
-                break;
-            case "place-triangle":
-                this.handleTrianglePlacement();
-                break;
-            case "place-ellipse":
-                this.handleEllipsePlacement();
-                break;
-            case "place-arc":
-                this.handleArcPlacement();
-                break;
-            case "default":
-                // Do nothing extra
-                break;
-            default:
-                console.log(`ERROR: Unrecognized mouse context: ${this._mouseContext}`);
-                this._mouseContext = "default";
+        const onCanvas = x > this._moduleCanvas._x && x < this._moduleCanvas._x + this._moduleCanvas._width && y > this._moduleCanvas._y && y < this._moduleCanvas._y + this._moduleCanvas._height;
+        if (onCanvas) {
+            switch (this._mouseContext) {
+                case "place-rect":
+                    this.handleRectPlacement(x, y);
+                    break;
+                case "place-quad":
+                    this.handleQuadPlacement(x, y);
+                    break;
+                case "place-triangle":
+                    this.handleTrianglePlacement(x, y);
+                    break;
+                case "place-ellipse":
+                    this.handleEllipsePlacement(x, y);
+                    break;
+                case "place-arc":
+                    this.handleArcPlacement(x, y);
+                    break;
+                case "default":
+                    // No shape selected
+                    break;
+                default:
+                    console.log(`ERROR: Unrecognized mouse context: ${this._mouseContext}`);
+                    this._mouseContext = "default";
+            }
         }
-         // Next, check if any of the side panels have been clicked, and activate their button handlers
-         this._shapeSelector.handleClick(x, y);
-         this._navbar.handleClick(x, y);
-         this._colourPalette.handleClick(x, y);
+        // Next, check if any of the side panels have been clicked, and activate their button handlers
+        this._shapeSelector.handleClick(x, y);
+        this._navbar.handleClick(x, y);
+        this._colourPalette.handleClick(x, y);
+        console.log(this._data);
     }
 
     // Sets the context and resets the click counter
@@ -139,25 +151,33 @@ export default class ModuleBuilder extends Screen {
         this._mouseClicks = 0;      // Reset
     }
 
-    // SECTION 4: Shape placement methods (top-level)
+    // SECTION 4: Shape placement methods (top-level - the deep functionality is in the canvas element)
 
-    handleRectPlacement = () => {
+    // Passes mouse coords to the canvas element; saves and completes the shape if it is finished
+    handleRectPlacement = (x: number, y: number) => {
+        const shape = this._moduleCanvas.handleRect(this._mouseClicks, x, y);
+        if (shape) {
+            console.log("Rectangle completed. Adding to shapes stack");
+            this._data.shapes.push(shape);
+            this.resetShape();
+        } else {
+            this._mouseClicks ++;   // If the shape isn't returned, augment mouse click counter
+        }
+    }
+
+    handleQuadPlacement = (x: number, y: number) => {
 
     }
 
-    handleQuadPlacement = () => {
+    handleTrianglePlacement = (x: number, y: number) => {
 
     }
 
-    handleTrianglePlacement = () => {
+    handleEllipsePlacement = (x: number, y: number) => {
 
     }
 
-    handleEllipsePlacement = () => {
-
-    }
-
-    handleArcPlacement = () => {
+    handleArcPlacement = (x: number, y: number) => {
 
     }
 
