@@ -19,7 +19,7 @@ export default class ModuleCanvas extends EditorField {
         this._leftMargin = 24;
         this._moduleWidth = 1;
         this._moduleHeight = 1;
-        this._scale = 3;                    // Scale starts at 3x magnification, but will decrease if the user requests a very large module
+        this._scale = 4;                    // Scale starts at 4x magnification, but will decrease if the user requests a very large module
         this._smarsModuleWidth = 20;        // Taken from SMARS repo: frontend/src/constants.ts
         this._currentlyDrawing = null;      // By default, no shapes are being drawn
     }
@@ -34,14 +34,15 @@ export default class ModuleCanvas extends EditorField {
     updateCanvasSize = (w: number, h: number) => {
         this._moduleWidth = w;
         this._moduleHeight = h;
-        if (this._moduleWidth > 10 || this._moduleHeight > 10) {      // TODO: Complete the thought here by making a switch case and setting limits
+        if (this._moduleWidth > 7 || this._moduleHeight > 7) {      // TODO: Complete the thought here by making a switch case and setting limits
             this._scale = 2;
         } else {
-            this._scale = 3;
+            this._scale = 4;
         }
     }
 
     // SECTION 2: Click Handlers for shape creation
+
     handleClick = (mouseX: number, mouseY: number) => {
         if (this._currentlyDrawing !== null) {
             switch (this._currentlyDrawing.shape) {
@@ -70,14 +71,29 @@ export default class ModuleCanvas extends EditorField {
     handleRect = (click: number, mouseX: number, mouseY: number) => {
         switch (click) {
             case 0:
-                // TODO: Convert pixel location to grid location
-                console.log(`(${mouseX}, ${mouseY})`);
+                this.convertMouseToGrid(mouseX, mouseY);
                 return null;        // If the shape isn't ready yet, return a null
             case 1:
-                console.log(`(${mouseX}, ${mouseY})`);
+                this.convertMouseToGrid(mouseX, mouseY);
                 return this._currentlyDrawing;
             default:
                 console.log("ERROR: Too many clicks... Or were you trying to round the corners?");
+                return null;        // If the click number is invalid return null
+        }
+    }
+
+    handleQuad = (click: number, mouseX: number, mouseY: number) => {
+        switch (click) {
+            case 0:
+            case 1:
+            case 2:
+                this.convertMouseToGrid(mouseX, mouseY);
+                return null;        // If the shape isn't ready yet, return a null
+            case 3:
+                this.convertMouseToGrid(mouseX, mouseY);
+                return this._currentlyDrawing;
+            default:
+                console.log("ERROR: Too many clicks for quadrangle placement.");
                 return null;        // If the click number is invalid return null
         }
     }
@@ -91,6 +107,13 @@ export default class ModuleCanvas extends EditorField {
             color: color,
             params: []
         }
+    }
+
+    // Takes mouse coordinates and converts them to grid locations for shape positioning
+    convertMouseToGrid = (mouseX: number, mouseY: number) => {
+        const gridX = (mouseX - this._x - this._leftMargin) / (this._scale * this._smarsModuleWidth);
+        const gridY = (mouseY - this._y - this._topMargin) / (this._scale * this._smarsModuleWidth);
+        console.log(`(${gridX}, ${gridY})`);
     }
 
     renderRectPlacement = (p5: P5, mouseX: number, mouseY: number, clickNumber: number) => {

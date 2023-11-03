@@ -140,9 +140,9 @@ export default class ModuleBuilder extends Screen {
             case "place-rect":
                 shape = this._moduleCanvas.handleRect(this._mouseClicks, x, y);
                 break;
-            // case "place-quad":
-            //     this.handleQuadPlacement(x, y);
-            //     break;
+            case "place-quad":
+                shape = this._moduleCanvas.handleQuad(this._mouseClicks, x, y);
+                break;
             // case "place-triangle":
             //     this.handleTrianglePlacement(x, y);
             //     break;
