@@ -214,8 +214,12 @@ export default class ModuleBuilder extends Screen {
         this._colourPalette.render(p5);
         this._inputsArea.render(p5);
         this._layersList.render(p5);
-        // TODO: Add current mouse coordinates to module canvas if a shape is being placed
-        this._moduleCanvas.render(p5);
+        // Render the Module Canvas with additional arguments if a new shape is being placed right now
+        if (this._currentShape) {
+            this._moduleCanvas.render(p5, p5.mouseX, p5.mouseY, this._mouseClicks);
+        } else {
+            this._moduleCanvas.render(p5);
+        }
         this._shapeSelector.render(p5);
     }
 
