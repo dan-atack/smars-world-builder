@@ -100,6 +100,38 @@ export default class ModuleCanvas extends EditorField {
         }
     }
 
+    handleTriangle = (click: number, mouseX: number, mouseY: number) => {
+        switch (click) {
+            case 0:
+                const { x, y } = this.convertMouseToGrid(mouseX, mouseY);   // Get the coordinates for the first corner from click 0
+                this._currentlyDrawing?.params.push(x);
+                this._currentlyDrawing?.params.push(y);
+                return null;        // If the shape isn't ready yet, return a null
+            case 1:
+                const p2 = this.convertMouseToGrid(mouseX, mouseY);
+                this._currentlyDrawing?.params.push(p2.x);
+                this._currentlyDrawing?.params.push(p2.y);
+                return null;        // If the shape isn't ready yet, return a null
+            case 2:
+                const p3 = this.convertMouseToGrid(mouseX, mouseY);
+                this._currentlyDrawing?.params.push(p3.x);
+                this._currentlyDrawing?.params.push(p3.y);
+                if (this._currentlyDrawing) this._shapes.push(this._currentlyDrawing);  // Add to shapes list when finished
+                return this._currentlyDrawing;
+            default:
+                console.log("ERROR: Too many clicks for triangle placement.");
+                return null;        // If the click number is invalid return null
+        }
+    }
+
+    handleEllipse = (click: number, mouseX: number, mouseY: number) => {
+
+    }
+
+    handleArc = (click: number, mouseX: number, mouseY: number) => {
+        
+    }
+
     // SECTION 3: Shape Creation methods
 
     // Called by the ModuleBuilder class when the user selects a shape from the (aptly named) shape selector panel; creates a new shape template
@@ -191,7 +223,37 @@ export default class ModuleCanvas extends EditorField {
     }
 
     renderTrianglePlacement = (p5: P5, mouseX: number, mouseY: number, clickNumber: number) => {
-
+        if (this._currentlyDrawing) {
+            const p = this._currentlyDrawing.params;    // For convenience
+            switch (clickNumber) {
+                case 0:
+                    break;
+                case 1:
+                    if (p.length === 2) {
+                        const { x, y } = this.convertGridToPixels(p[0], p[1]);
+                        p5.fill(CONSTANTS.colors.BLUEGREEN_CRYSTAL);    // Show the first point in blue
+                        p5.ellipse(x, y, 8);
+                        p5.fill(this._currentlyDrawing.color);         // Trace a line from the first point to the current mouse coords
+                        p5.line(x, y, mouseX, mouseY);
+                    }
+                    break;
+                case 2:
+                    if (p.length === 4) {
+                        const p1 = this.convertGridToPixels(p[0], p[1]);
+                        const p2 = this.convertGridToPixels(p[2], p[3]);
+                        p5.fill(CONSTANTS.colors.BLUEGREEN_CRYSTAL);    // Show the corners as blue points
+                        p5.ellipse(p1.x, p1.y, 8);
+                        p5.ellipse(p2.x, p2.y, 8);
+                        p5.fill(this._currentlyDrawing.color);
+                        p5.line(p1.x, p1.y, p2.x, p2.y);
+                        p5.triangle(p1.x, p1.y, p2.x, p2.y, mouseX, mouseY);
+                    }
+                    break;
+            }
+        }
+        // Follow the mouse cursor with a green circle
+        p5.fill(CONSTANTS.colors.GREEN_TERMINAL);
+        p5.ellipse(mouseX, mouseY, 8);
     }
 
     renderEllipsePlacement = (p5: P5, mouseX: number, mouseY: number, clickNumber: number) => {

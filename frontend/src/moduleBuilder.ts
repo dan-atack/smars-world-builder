@@ -77,7 +77,7 @@ export default class ModuleBuilder extends Screen {
         this.getModules(this.setModules);
     }
 
-    // SECTION 2: Updater Methods (Passed down to subcomponents)
+    // SECTION 2: Setter Methods (Passed down to subcomponents)
 
     // Updates the module data whenever a change is detected from any of the editor's sub-components
     setModuleData = (data: ModuleInfo) => {
@@ -130,9 +130,9 @@ export default class ModuleBuilder extends Screen {
         this._mouseClicks = 0;      // Reset
     }
 
-    // SECTION 4: Shape placement methods (top-level - the deep functionality is in the canvas element)
+    // SECTION 4: Shape placement method (top-level - the deep functionality is in the canvas element)
 
-    // Passes mouse coords to the canvas element; saves and completes the shape if it is finished
+    // Passes mouse coords to the canvas element; it returns the data for finished shapes (or a null if the shape isn't ready)
 
     handleShapePlacement = (x: number, y: number) => {
         let shape: Shape | null = null;
@@ -143,15 +143,15 @@ export default class ModuleBuilder extends Screen {
             case "place-quad":
                 shape = this._moduleCanvas.handleQuad(this._mouseClicks, x, y);
                 break;
-            // case "place-triangle":
-            //     this.handleTrianglePlacement(x, y);
-            //     break;
-            // case "place-ellipse":
-            //     this.handleEllipsePlacement(x, y);
-            //     break;
-            // case "place-arc":
-            //     this.handleArcPlacement(x, y);
-            //     break;
+            case "place-triangle":
+                shape = this._moduleCanvas.handleTriangle(this._mouseClicks, x, y);
+                break;
+            case "place-ellipse":
+                this._moduleCanvas.handleEllipse(this._mouseClicks, x, y);
+                break;
+            case "place-arc":
+                this._moduleCanvas.handleArc(this._mouseClicks, x, y);
+                break;
             case "default":
                 // No shape selected
                 break;
@@ -167,30 +167,8 @@ export default class ModuleBuilder extends Screen {
             this._mouseClicks ++;   // If the shape isn't returned, augment mouse click counter
         }
     }
-    handleRectPlacement = (x: number, y: number) => {
-        const shape = this._moduleCanvas.handleRect(this._mouseClicks, x, y);
-        if (shape) {
-            console.log("Rectangle completed. Adding to shapes stack");
-            this._data.shapes.push(shape);
-            this.resetShape();
-        } else {
-            this._mouseClicks ++;   // If the shape isn't returned, augment mouse click counter
-        }
-    }
 
-    handleTrianglePlacement = (x: number, y: number) => {
-
-    }
-
-    handleEllipsePlacement = (x: number, y: number) => {
-
-    }
-
-    handleArcPlacement = (x: number, y: number) => {
-
-    }
-
-    // SECTION 4: Module Data Loading methods
+    // SECTION 5: Module Data Loading methods
 
     setModules = (data?: [string, string][]) => {
         if (data) {
