@@ -13,6 +13,7 @@ export default class ModuleCanvas extends EditorField {
     _smarsModuleWidth;      // From SMARS' frontend constants; used to translate module w/h values to editor screen pixels
     _shapes: Shape[];       // The existing shapes that have already been drawn for the module being designed
     _currentlyDrawing: Shape | null;    // The shape that is currently being drawn, if any
+    _perfectCircles: boolean;   // Toggles whether to ignore height value for ellipses (true = h is ignored so that w = radius in all directions)
 
     constructor(x: number, y: number, w: number, h: number, label?: string) {
         super(x, y, w, h, label);
@@ -24,6 +25,7 @@ export default class ModuleCanvas extends EditorField {
         this._smarsModuleWidth = CONSTANTS.SMARS_BLOCK_WIDTH;        // Taken from SMARS repo: frontend/src/constants.ts
         this._shapes = [];                  // By default, since no shapes have been drawn yet, this list is empty
         this._currentlyDrawing = null;      // By default, no shapes are being drawn
+        this._perfectCircles = false;       // By default, assume the user wants ellipses from the ellipse button
     }
 
     setup = () => {
@@ -125,14 +127,34 @@ export default class ModuleCanvas extends EditorField {
     }
 
     handleEllipse = (click: number, mouseX: number, mouseY: number) => {
-
+        switch (click) {
+            case 0:
+                const { x, y } = this.convertMouseToGrid(mouseX, mouseY);   // Get the coordinates for the center from mouse click
+                this._currentlyDrawing?.params.push(x);
+                this._currentlyDrawing?.params.push(y);
+                return null;
+            case 1:
+                console.log("ping")
+                const p2 = this.convertMouseToGrid(mouseX, mouseY);         // Set both radii at once, to draw the circle in 2 steps
+                const w = Math.abs(p2.x - (this._currentlyDrawing?.params[0] || 0)) * 2;
+                const h = Math.abs(p2.y - (this._currentlyDrawing?.params[1] || 0)) * 2;
+                this._currentlyDrawing?.params.push(w);
+                if (!this._perfectCircles) {
+                    this._currentlyDrawing?.params.push(h);     // Only use 2nd radius parameter if the user does not want a perfect circle
+                }
+                if (this._currentlyDrawing) this._shapes.push(this._currentlyDrawing);  // Add to shapes list when finished
+                return this._currentlyDrawing;
+            default:
+                console.log("ERROR: Too many clicks for ellipse placement.");
+                return null;        // If the click number is invalid return null
+        }
     }
 
     handleArc = (click: number, mouseX: number, mouseY: number) => {
         
     }
 
-    // SECTION 3: Shape Creation methods
+    // SECTION 3: Setter methods
 
     // Called by the ModuleBuilder class when the user selects a shape from the (aptly named) shape selector panel; creates a new shape template
     setCurrentShape = (shape: string, color: string) => {
@@ -143,12 +165,19 @@ export default class ModuleCanvas extends EditorField {
         }
     }
 
+    // Determines whether or not the ellipse creator will consider h value (perfect circle = no h value used)
+    setPerfectCircleMode = (circle: boolean) => {
+        this._perfectCircles = circle;
+    }
+
     // Takes mouse coordinates and converts them to grid locations for shape positioning
     convertMouseToGrid = (mouseX: number, mouseY: number) => {
         const gridX = (mouseX - this._x - this._leftMargin) / (this._scale * this._smarsModuleWidth);
         const gridY = (mouseY - this._y - this._topMargin) / (this._scale * this._smarsModuleWidth);
         return { x: gridX, y: gridY};
     }
+
+    // SECTION 4: Rendering methods
 
     // Takes grid coordinates for a saved/in-progress shape and converts them back to pixels (for rendering)
     convertGridToPixels = (x: number, y: number) => {
@@ -257,7 +286,31 @@ export default class ModuleCanvas extends EditorField {
     }
 
     renderEllipsePlacement = (p5: P5, mouseX: number, mouseY: number, clickNumber: number) => {
-
+        if (this._currentlyDrawing) {
+            const p = this._currentlyDrawing.params;    // For convenience
+            switch (clickNumber) {
+                case 0:
+                    break;
+                case 1:
+                    if (p.length === 2) {
+                        const { x, y } = this.convertGridToPixels(p[0], p[1]);
+                        p5.fill(CONSTANTS.colors.BLUEGREEN_CRYSTAL);    // Show the center point in blue
+                        p5.ellipse(x, y, 8);
+                        p5.fill(this._currentlyDrawing.color);          // Draw out the rest of the circle to the mouse location
+                        const w = (x - mouseX) * 2;
+                        const h = (y - mouseY) * 2
+                        if (this._perfectCircles) {
+                            p5.ellipse(x, y, w);        // If perfect circles mode is enabled, just use width to set radius
+                        } else {
+                            p5.ellipse(x, y, w, h);     // Use height variable if perfect circle mode is disabled
+                        }
+                    }
+                    break;
+            }
+        }
+        // Follow the mouse cursor with a green circle
+        p5.fill(CONSTANTS.colors.GREEN_TERMINAL);
+        p5.ellipse(mouseX, mouseY, 8);
     }
 
     renderArcPlacement = (p5: P5, mouseX: number, mouseY: number, clickNumber: number) => {

@@ -7,6 +7,7 @@ import InputsArea from "./inputsArea";
 import LayersList from "./layersList";
 import ModuleCanvas from "./moduleCanvas";
 import ShapeSelector from "./shapeSelector";
+import ShapeOptions from "./shapeOptions";
 import { CONSTANTS, ModuleInfo, Shape } from "./constants";
 import { getModules, getOneModule, addNewModule } from "./server_functions";
 
@@ -19,10 +20,12 @@ export default class ModuleBuilder extends Screen {
     _layersList: LayersList;
     _moduleCanvas: ModuleCanvas;
     _shapeSelector: ShapeSelector;
+    _shapeOptions: ShapeOptions;
     _currentColour: string;
     _currentShape: string;
     _mouseContext: string;  // Used to keep track of which shape (if any) is being created
     _mouseClicks: number;   // Used to keep track of the number of clicks that have occurred in a shape placement sequence
+    _circleMode: boolean;   // Used to tell the module canvas to paint only perfect circles (true) or to allow ellipses (false)
     modulesFromDatabase: [string, string][];
     loadedModule: ModuleInfo | null;
     getModules: (setter: (data?: []) => void) => void;
@@ -50,13 +53,15 @@ export default class ModuleBuilder extends Screen {
         this._navbar = new Navbar(CONSTANTS.NAVBAR_X, 0, CONSTANTS.NAVBAR_WIDTH, CONSTANTS.NAVBAR_HEIGHT, switchScreen);
         this._colourPalette = new ColourPalette(0, 0, CONSTANTS.NAVBAR_X, CONSTANTS.SCREEN_HEIGHT, this.setColour);
         this._inputsArea = new InputsArea(CONSTANTS.NAVBAR_X + CONSTANTS.NAVBAR_WIDTH, 0, CONSTANTS.NAVBAR_X, CONSTANTS.SCREEN_HEIGHT, this.setModuleData);
-        this._layersList = new LayersList(CONSTANTS.SCREEN_WIDTH - CONSTANTS.NAVBAR_X * 2, CONSTANTS.NAVBAR_HEIGHT, CONSTANTS.NAVBAR_X, CONSTANTS.SCREEN_HEIGHT - CONSTANTS.NAVBAR_HEIGHT, "LAYERS");
+        this._layersList = new LayersList(CONSTANTS.SCREEN_WIDTH - CONSTANTS.NAVBAR_X * 2, CONSTANTS.NAVBAR_HEIGHT, CONSTANTS.NAVBAR_X, CONSTANTS.SCREEN_HEIGHT - CONSTANTS.NAVBAR_HEIGHT * 2, "LAYERS");
         this._moduleCanvas = new ModuleCanvas(CONSTANTS.NAVBAR_X, CONSTANTS.NAVBAR_HEIGHT, CONSTANTS.NAVBAR_WIDTH - CONSTANTS.NAVBAR_X, CONSTANTS.SCREEN_HEIGHT - CONSTANTS.NAVBAR_HEIGHT * 2, "CANVAS");
         this._shapeSelector = new ShapeSelector(CONSTANTS.NAVBAR_X, CONSTANTS.SCREEN_HEIGHT - CONSTANTS.NAVBAR_HEIGHT, CONSTANTS.NAVBAR_WIDTH - CONSTANTS.NAVBAR_X, CONSTANTS.NAVBAR_HEIGHT, this.setShape);
+        this._shapeOptions = new ShapeOptions(CONSTANTS.NAVBAR_X + CONSTANTS.NAVBAR_WIDTH - CONSTANTS.NAVBAR_X, CONSTANTS.SCREEN_HEIGHT - CONSTANTS.NAVBAR_HEIGHT, CONSTANTS.NAVBAR_X, CONSTANTS.NAVBAR_HEIGHT, this.setCircleMode);
         this._currentColour = "#000000";        // Black by default
         this._currentShape = "";                // No shape by default
         this._mouseContext = "default";         // Default to regular mouse context (no shape placement)
         this._mouseClicks = 0;                  // Only keep track of mouse clicks during shape placement
+        this._circleMode = false;                // By default, the ellipse button will produce an ellipse
         this.modulesFromDatabase = [];
         this.loadedModule = null;               // By default no module is loaded
         this.getModules = getModules;
@@ -74,6 +79,7 @@ export default class ModuleBuilder extends Screen {
         this._layersList.setup();
         this._moduleCanvas.setup();
         this._shapeSelector.setup();
+        this._shapeOptions.setup();
         this.getModules(this.setModules);
     }
 
@@ -108,6 +114,18 @@ export default class ModuleBuilder extends Screen {
         this._mouseClicks = 0;
     }
 
+    // Toggles the status of the perfect circle mode (activated by a button in the Shape Options component)
+    setCircleMode = () => {
+        if (this._circleMode) {
+            this._circleMode = false;
+            this._shapeOptions._buttons[0].setSelected(false);
+        } else {
+            this._circleMode = true;
+            this._shapeOptions._buttons[0].setSelected(true);
+        }
+        this._moduleCanvas.setPerfectCircleMode(this._circleMode);  // Pass on the message to the canvas component
+    }
+
     // SECTION 3: Click Handlers & Mouse Context
 
     handleClick = (x: number, y: number) => {
@@ -120,6 +138,7 @@ export default class ModuleBuilder extends Screen {
         this._shapeSelector.handleClick(x, y);
         this._navbar.handleClick(x, y);
         this._colourPalette.handleClick(x, y);
+        this._shapeOptions.handleClick(x, y);
         // Finally, log the entire data object to the console for maximum data visibility
         console.log(this._data);
     }
@@ -147,10 +166,10 @@ export default class ModuleBuilder extends Screen {
                 shape = this._moduleCanvas.handleTriangle(this._mouseClicks, x, y);
                 break;
             case "place-ellipse":
-                this._moduleCanvas.handleEllipse(this._mouseClicks, x, y);
+                shape = this._moduleCanvas.handleEllipse(this._mouseClicks, x, y);
                 break;
             case "place-arc":
-                this._moduleCanvas.handleArc(this._mouseClicks, x, y);
+                // shape = this._moduleCanvas.handleArc(this._mouseClicks, x, y);
                 break;
             case "default":
                 // No shape selected
@@ -160,7 +179,7 @@ export default class ModuleBuilder extends Screen {
                 this._mouseContext = "default";
         }
         if (shape) {
-            console.log("Shape completed. Adding to shapes stack");
+            console.log(`${shape.shape} completed. Adding to shapes stack`);
             this._data.shapes.push(shape);
             this.resetShape();
         } else {
@@ -192,6 +211,7 @@ export default class ModuleBuilder extends Screen {
         this._colourPalette.render(p5);
         this._inputsArea.render(p5);
         this._layersList.render(p5);
+        this._shapeOptions.render(p5);
         // Render the Module Canvas with additional arguments if a new shape is being placed right now
         if (this._currentShape) {
             this._moduleCanvas.render(p5, p5.mouseX, p5.mouseY, this._mouseClicks);
