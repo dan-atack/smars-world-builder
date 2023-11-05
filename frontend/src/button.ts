@@ -71,6 +71,12 @@ export default class Button {
             case "arc":
                 p5.arc(this._x + this._width / 2, this._y + this._height * 1 / 4, this._width, this._height, 0, 3.14);
                 break;
+            case "arc-pie":
+                p5.arc(this._x + this._width / 2, this._y + this._height * 1 / 4, this._width, this._height, 0, 4.14);
+                break;
+            case "arc-open":
+                p5.arc(this._x + this._width / 2, this._y + this._height * 1 / 4, this._width, this._height, 1, 4.14);
+                break;
             default:
                 p5.rect(this._x, this._y, this._width, this._height, 8, 8, 8, 8);
         }

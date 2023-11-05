@@ -14,6 +14,7 @@ export default class ModuleCanvas extends EditorField {
     _shapes: Shape[];       // The existing shapes that have already been drawn for the module being designed
     _currentlyDrawing: Shape | null;    // The shape that is currently being drawn, if any
     _perfectCircles: boolean;   // Toggles whether to ignore height value for ellipses (true = h is ignored so that w = radius in all directions)
+    _arcMode: string;       // CHORD, PIE or OPEN
 
     constructor(x: number, y: number, w: number, h: number, label?: string) {
         super(x, y, w, h, label);
@@ -26,13 +27,14 @@ export default class ModuleCanvas extends EditorField {
         this._shapes = [];                  // By default, since no shapes have been drawn yet, this list is empty
         this._currentlyDrawing = null;      // By default, no shapes are being drawn
         this._perfectCircles = false;       // By default, assume the user wants ellipses from the ellipse button
+        this._arcMode = 'CHORD';
     }
 
     setup = () => {
         this._buttons = [];
     }
 
-    // SECTION 1: Canvas dimensions updater
+    // SECTION 1: Canvas dimensions updater / Option setters
 
     // Increases/decreases the canvas in either vertical or horizontal direction
     updateCanvasSize = (w: number, h: number) => {
@@ -43,6 +45,10 @@ export default class ModuleCanvas extends EditorField {
         } else {
             this._scale = 4;
         }
+    }
+
+    setArcMode = (mode: string) => {
+        this._arcMode = mode;
     }
 
     // SECTION 2: Shape Creation Methods (called by the Module Builder class's click handlers)
@@ -134,7 +140,6 @@ export default class ModuleCanvas extends EditorField {
                 this._currentlyDrawing?.params.push(y);
                 return null;
             case 1:
-                console.log("ping")
                 const p2 = this.convertMouseToGrid(mouseX, mouseY);         // Set both radii at once, to draw the circle in 2 steps
                 const w = Math.abs(p2.x - (this._currentlyDrawing?.params[0] || 0)) * 2;
                 const h = Math.abs(p2.y - (this._currentlyDrawing?.params[1] || 0)) * 2;
@@ -150,8 +155,39 @@ export default class ModuleCanvas extends EditorField {
         }
     }
 
-    handleArc = (click: number, mouseX: number, mouseY: number) => {
-        
+    handleArc = (click: number, mouseX: number, mouseY: number, arcMode: string) => {
+        switch (click) {
+            case 0:         // Define center
+                const { x, y } = this.convertMouseToGrid(mouseX, mouseY);   // Get the coordinates for the center from mouse click
+                this._currentlyDrawing?.params.push(x);
+                this._currentlyDrawing?.params.push(y);
+                return null;
+            case 1:         // Define radius
+                const p2 = this.convertMouseToGrid(mouseX, mouseY);         // Set both radii at once, to draw the circle in 2 steps
+                const w = Math.abs(p2.x - (this._currentlyDrawing?.params[0] || 0)) * 2;
+                const h = Math.abs(p2.y - (this._currentlyDrawing?.params[1] || 0)) * 2;
+                this._currentlyDrawing?.params.push(w);
+                if (!this._perfectCircles) {
+                    this._currentlyDrawing?.params.push(h);     // Only use 2nd radius parameter if the user does not want a perfect circle
+                } else {
+                    this._currentlyDrawing?.params.push(w);     // If perfect circles mode is enabled, use the width value twice
+                }
+                return null;
+            case 2:         // Define arc start
+                const start = (mouseX / 60) % (6.28)    // Convert mouse location to a number of radians (never more than 2 * pi)
+                this._currentlyDrawing?.params.push(start);
+                return null;
+            case 3:         // Define arc stop (and complete shape)
+                const stop = (mouseX / 60) % (6.28)    // Convert mouse location to a number of radians (never more than 2 * pi)
+                this._currentlyDrawing?.params.push(stop);
+                if (this._currentlyDrawing) this._currentlyDrawing.mode = arcMode;
+                if (this._currentlyDrawing) this._shapes.push(this._currentlyDrawing);
+                return this._currentlyDrawing;
+
+            default:
+                console.log("ERROR: Too many clicks for arc section placement.");
+                return null;        // If the click number is invalid return null
+        }
     }
 
     // SECTION 3: Setter methods
@@ -314,7 +350,68 @@ export default class ModuleCanvas extends EditorField {
     }
 
     renderArcPlacement = (p5: P5, mouseX: number, mouseY: number, clickNumber: number) => {
-
+        if (this._currentlyDrawing) {
+            const p = this._currentlyDrawing.params;    // For convenience
+            switch (clickNumber) {
+                case 0:
+                    break;
+                case 1:
+                    if (p.length === 2) {
+                        const { x, y } = this.convertGridToPixels(p[0], p[1]);
+                        p5.fill(CONSTANTS.colors.BLUEGREEN_CRYSTAL);    // Show the center point in blue
+                        p5.ellipse(x, y, 8);
+                        p5.fill(this._currentlyDrawing.color);          // Draw out the rest of the circle to the mouse location
+                        const w = (x - mouseX) * 2;
+                        const h = (y - mouseY) * 2
+                        if (this._perfectCircles) {
+                            p5.ellipse(x, y, w, w);     // If circles mode is enabled, use width twice (h value is non-optional for arcs!)
+                        } else {
+                            p5.ellipse(x, y, w, h);     // Use height variable if perfect circle mode is disabled
+                        }
+                    }
+                    break;
+                case 2: // Arc start placement
+                    const mouseRadians = mouseX / 60 // User has to move the mouse 376 pixels left/right to rotate the start a full revolution
+                    const { x, y } = this.convertGridToPixels(p[0], p[1]);
+                    const w = p[2] * this._scale * this._smarsModuleWidth;
+                    const h = p[3] * this._scale * this._smarsModuleWidth;
+                    p5.fill(this._currentlyDrawing.color);
+                    let mode: any;
+                    if (this._arcMode === "OPEN") {
+                        mode = p5.OPEN;
+                    } else if (this._arcMode === "PIE") {
+                        mode = p5.PIE;
+                    } else {
+                        mode = p5.CHORD;        // Chord is default
+                    }
+                    p5.arc(x, y, w, h, mouseRadians, 0, mode);
+                    p5.text(mouseX, 500, 450);
+                    p5.text(mouseRadians.toFixed(2), 500, 500);
+                    break;
+                case 3: // Arc finish placement
+                    const mouseRads = mouseX / 60 // User has to move the mouse 376 pixels left/right to rotate the start a full revolution
+                    const center = this.convertGridToPixels(p[0], p[1]);
+                    const width = p[2] * this._scale * this._smarsModuleWidth;
+                    const height = p[3] * this._scale * this._smarsModuleWidth;
+                    const start = p[4];
+                    p5.fill(this._currentlyDrawing.color);
+                    let m: any;
+                    if (this._arcMode === "OPEN") {
+                        m = p5.OPEN;
+                    } else if (this._arcMode === "PIE") {
+                        m = p5.PIE;
+                    } else {
+                        m = p5.CHORD;        // Chord is default
+                    }
+                    p5.arc(center.x, center.y, width, height, start, mouseRads, m);
+                    p5.text(mouseX, 500, 450);
+                    p5.text(mouseRads.toFixed(2), 500, 500);
+                break;
+            }
+        }
+        // Follow the mouse cursor with a green circle
+        p5.fill(CONSTANTS.colors.GREEN_TERMINAL);
+        p5.ellipse(mouseX, mouseY, 8);
     }
 
     // Optionally takes mouse coordinates + click number if a new shape is being drawn

@@ -26,6 +26,7 @@ export default class ModuleBuilder extends Screen {
     _mouseContext: string;  // Used to keep track of which shape (if any) is being created
     _mouseClicks: number;   // Used to keep track of the number of clicks that have occurred in a shape placement sequence
     _circleMode: boolean;   // Used to tell the module canvas to paint only perfect circles (true) or to allow ellipses (false)
+    _arcMode: string;       // For arcs; either 'CHORD', 'OPEN', or 'PIE'
     modulesFromDatabase: [string, string][];
     loadedModule: ModuleInfo | null;
     getModules: (setter: (data?: []) => void) => void;
@@ -56,18 +57,23 @@ export default class ModuleBuilder extends Screen {
         this._layersList = new LayersList(CONSTANTS.SCREEN_WIDTH - CONSTANTS.NAVBAR_X * 2, CONSTANTS.NAVBAR_HEIGHT, CONSTANTS.NAVBAR_X, CONSTANTS.SCREEN_HEIGHT - CONSTANTS.NAVBAR_HEIGHT * 2, "LAYERS");
         this._moduleCanvas = new ModuleCanvas(CONSTANTS.NAVBAR_X, CONSTANTS.NAVBAR_HEIGHT, CONSTANTS.NAVBAR_WIDTH - CONSTANTS.NAVBAR_X, CONSTANTS.SCREEN_HEIGHT - CONSTANTS.NAVBAR_HEIGHT * 2, "CANVAS");
         this._shapeSelector = new ShapeSelector(CONSTANTS.NAVBAR_X, CONSTANTS.SCREEN_HEIGHT - CONSTANTS.NAVBAR_HEIGHT, CONSTANTS.NAVBAR_WIDTH - CONSTANTS.NAVBAR_X, CONSTANTS.NAVBAR_HEIGHT, this.setShape);
-        this._shapeOptions = new ShapeOptions(CONSTANTS.NAVBAR_X + CONSTANTS.NAVBAR_WIDTH - CONSTANTS.NAVBAR_X, CONSTANTS.SCREEN_HEIGHT - CONSTANTS.NAVBAR_HEIGHT, CONSTANTS.NAVBAR_X, CONSTANTS.NAVBAR_HEIGHT, this.setCircleMode);
+        this._shapeOptions = new ShapeOptions(CONSTANTS.NAVBAR_X + CONSTANTS.NAVBAR_WIDTH - CONSTANTS.NAVBAR_X, CONSTANTS.SCREEN_HEIGHT - CONSTANTS.NAVBAR_HEIGHT, CONSTANTS.NAVBAR_X, CONSTANTS.NAVBAR_HEIGHT, this.setCircleMode, this.setArcMode);
         this._currentColour = "#000000";        // Black by default
         this._currentShape = "";                // No shape by default
         this._mouseContext = "default";         // Default to regular mouse context (no shape placement)
         this._mouseClicks = 0;                  // Only keep track of mouse clicks during shape placement
-        this._circleMode = false;                // By default, the ellipse button will produce an ellipse
+        this._circleMode = false;               // By default, the ellipse button will produce an ellipse
+        this._arcMode = "CHORD";                // All arcs are 'chord' style by default
         this.modulesFromDatabase = [];
         this.loadedModule = null;               // By default no module is loaded
         this.getModules = getModules;
         this.getOneModule = getOneModule;
         this.addNewModule = addNewModule;
     }
+
+    // STILL TODO:
+    // - Snap-to-grid mode
+    // - Layers display? Very quickly, maybe?
 
     // SECTION 1: Basic Setup
 
@@ -126,6 +132,16 @@ export default class ModuleBuilder extends Screen {
         this._moduleCanvas.setPerfectCircleMode(this._circleMode);  // Pass on the message to the canvas component
     }
 
+    setArcMode = (mode: string) => {
+        if (mode === "PIE" || mode === "CHORD" || mode === "OPEN") {
+            this._arcMode = mode;
+        } else {
+            console.log(`WARNING: Unrecognized arc mode requested: ${mode}. Overriding with 'CHORD'`)
+            this._arcMode = "CHORD";
+        }
+        this._moduleCanvas.setArcMode(this._arcMode);       // Pass on the message to the canvas component!
+    }
+
     // SECTION 3: Click Handlers & Mouse Context
 
     handleClick = (x: number, y: number) => {
@@ -169,7 +185,7 @@ export default class ModuleBuilder extends Screen {
                 shape = this._moduleCanvas.handleEllipse(this._mouseClicks, x, y);
                 break;
             case "place-arc":
-                // shape = this._moduleCanvas.handleArc(this._mouseClicks, x, y);
+                shape = this._moduleCanvas.handleArc(this._mouseClicks, x, y, this._arcMode);
                 break;
             case "default":
                 // No shape selected
