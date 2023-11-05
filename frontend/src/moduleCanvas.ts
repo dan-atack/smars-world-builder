@@ -15,6 +15,7 @@ export default class ModuleCanvas extends EditorField {
     _currentlyDrawing: Shape | null;    // The shape that is currently being drawn, if any
     _perfectCircles: boolean;   // Toggles whether to ignore height value for ellipses (true = h is ignored so that w = radius in all directions)
     _arcMode: string;       // CHORD, PIE or OPEN
+    _gridSnap: number;      // Number of pixels ( in the final product ) that you can... JUMP TO!
 
     constructor(x: number, y: number, w: number, h: number, label?: string) {
         super(x, y, w, h, label);
@@ -28,6 +29,7 @@ export default class ModuleCanvas extends EditorField {
         this._currentlyDrawing = null;      // By default, no shapes are being drawn
         this._perfectCircles = false;       // By default, assume the user wants ellipses from the ellipse button
         this._arcMode = 'CHORD';
+        this._gridSnap = 1;                 // By default, just jump to the nearest pixel (no effect)
     }
 
     setup = () => {
@@ -49,6 +51,10 @@ export default class ModuleCanvas extends EditorField {
 
     setArcMode = (mode: string) => {
         this._arcMode = mode;
+    }
+
+    setGridSnap = (pixels: number) => {
+        this._gridSnap = pixels;
     }
 
     // SECTION 2: Shape Creation Methods (called by the Module Builder class's click handlers)
@@ -141,8 +147,8 @@ export default class ModuleCanvas extends EditorField {
                 return null;
             case 1:
                 const p2 = this.convertMouseToGrid(mouseX, mouseY);         // Set both radii at once, to draw the circle in 2 steps
-                const w = Math.abs(p2.x - (this._currentlyDrawing?.params[0] || 0)) * 2;
-                const h = Math.abs(p2.y - (this._currentlyDrawing?.params[1] || 0)) * 2;
+                const w = parseFloat((Math.abs(p2.x - (this._currentlyDrawing?.params[0] || 0)) * 2).toFixed(2));
+                const h = parseFloat((Math.abs(p2.y - (this._currentlyDrawing?.params[1] || 0)) * 2).toFixed(2));
                 this._currentlyDrawing?.params.push(w);
                 if (!this._perfectCircles) {
                     this._currentlyDrawing?.params.push(h);     // Only use 2nd radius parameter if the user does not want a perfect circle
@@ -164,8 +170,8 @@ export default class ModuleCanvas extends EditorField {
                 return null;
             case 1:         // Define radius
                 const p2 = this.convertMouseToGrid(mouseX, mouseY);         // Set both radii at once, to draw the circle in 2 steps
-                const w = Math.abs(p2.x - (this._currentlyDrawing?.params[0] || 0)) * 2;
-                const h = Math.abs(p2.y - (this._currentlyDrawing?.params[1] || 0)) * 2;
+                const w = parseFloat((Math.abs(p2.x - (this._currentlyDrawing?.params[0] || 0)) * 2).toFixed(2));
+                const h = parseFloat((Math.abs(p2.y - (this._currentlyDrawing?.params[1] || 0)) * 2).toFixed(2));
                 this._currentlyDrawing?.params.push(w);
                 if (!this._perfectCircles) {
                     this._currentlyDrawing?.params.push(h);     // Only use 2nd radius parameter if the user does not want a perfect circle
@@ -174,11 +180,11 @@ export default class ModuleCanvas extends EditorField {
                 }
                 return null;
             case 2:         // Define arc start
-                const start = (mouseX / 60) % (6.28)    // Convert mouse location to a number of radians (never more than 2 * pi)
+                const start = parseFloat(((mouseX / 60) % (6.28)).toFixed(2));    // Convert mouse location to a number of radians (never more than 2 * pi)
                 this._currentlyDrawing?.params.push(start);
                 return null;
             case 3:         // Define arc stop (and complete shape)
-                const stop = (mouseX / 60) % (6.28)    // Convert mouse location to a number of radians (never more than 2 * pi)
+                const stop = parseFloat(((mouseX / 60) % (6.28)).toFixed(2));   // Convert mouse location to a number of radians (never more than 2 * pi)
                 this._currentlyDrawing?.params.push(stop);
                 if (this._currentlyDrawing) this._currentlyDrawing.mode = arcMode;
                 if (this._currentlyDrawing) this._shapes.push(this._currentlyDrawing);
@@ -208,8 +214,19 @@ export default class ModuleCanvas extends EditorField {
 
     // Takes mouse coordinates and converts them to grid locations for shape positioning
     convertMouseToGrid = (mouseX: number, mouseY: number) => {
-        const gridX = (mouseX - this._x - this._leftMargin) / (this._scale * this._smarsModuleWidth);
-        const gridY = (mouseY - this._y - this._topMargin) / (this._scale * this._smarsModuleWidth);
+        // EXPERIMENTAL: Use grid snap-to value to force a round number
+        // E.g. position pixel (100, 100) = grid location (1, 1) and pixel (180,180) = (2, 2)
+        // And the distance between grid locations 1 and 2 in SMARS is 20px
+        // Therefore, for a 1-pixel snap, you would need to always have the mouse location rounded down to the nearest 4 (scale)
+        // And, by extension, for a 2-pixel snap you would need to round down to the nearest 8 (scale x snap level)
+        let gridX = (mouseX - this._x - this._leftMargin) / (this._scale * this._smarsModuleWidth);
+        let gridY = (mouseY - this._y - this._topMargin) / (this._scale * this._smarsModuleWidth);
+        if (this._gridSnap > 0) {
+            gridX = parseFloat((Math.floor((mouseX - this._x - this._leftMargin) / (this._scale * this._gridSnap)) * (this._scale * this._gridSnap) / (this._scale * this._smarsModuleWidth)).toFixed(2));
+            gridY = parseFloat((Math.floor((mouseY - this._y - this._topMargin) / (this._scale * this._gridSnap)) * (this._scale * this._gridSnap) / (this._scale * this._smarsModuleWidth)).toFixed(2));
+            console.log(gridX);
+        }
+        console.log(gridX);
         return { x: gridX, y: gridY};
     }
 
@@ -222,7 +239,24 @@ export default class ModuleCanvas extends EditorField {
         return { x: pixelX, y: pixelY };
     }
 
+    // Used to move mouse cursor shadows to the nearest grid point, if available
+    gridifyMouseCoords = (mouseX: number, mouseY: number) => {
+        let snapX: number = 0;
+        let snapY: number = 0;
+        if (this._gridSnap > 0) {       // Grid snap is set to at least one pixel
+            snapX = (Math.floor((mouseX - this._x - this._leftMargin) / (this._scale * this._gridSnap)) * (this._scale * this._gridSnap)) + this._x + this._leftMargin;
+            snapY = (Math.floor((mouseY - this._y - this._topMargin) / (this._scale * this._gridSnap)) * (this._scale * this._gridSnap)) + this._y + this._topMargin;
+        } else {                        // Grid snap is not in effect
+            snapX = mouseX;
+            snapY = mouseY;
+        }
+        
+        return { snapX: snapX, snapY: snapY };
+    }
+
     renderRectPlacement = (p5: P5, mouseX: number, mouseY: number, clickNumber: number) => {
+        // Get snapified mouse coordinates for mouse shadows
+        const { snapX, snapY } = this.gridifyMouseCoords(mouseX, mouseY);
         switch (clickNumber) {
             case 0:
                 break;
@@ -232,15 +266,16 @@ export default class ModuleCanvas extends EditorField {
                     p5.fill(CONSTANTS.colors.BLUEGREEN_CRYSTAL);    // Show the first point in blue
                     p5.ellipse(x, y, 8);
                     p5.fill(this._currentlyDrawing.color);         // Trace the resulting rectangle in its intended colour
-                    p5.rect(x, y, mouseX - x, mouseY - y);
+                    p5.rect(x, y, snapX - x, snapY - y);
                 }
         }
         // Follow the mouse cursor with a green circle
         p5.fill(CONSTANTS.colors.GREEN_TERMINAL);
-        p5.ellipse(mouseX, mouseY, 8);
+        p5.ellipse(snapX, snapY, 8);
     }
 
     renderQuadPlacement = (p5: P5, mouseX: number, mouseY: number, clickNumber: number) => {
+        const { snapX, snapY } = this.gridifyMouseCoords(mouseX, mouseY);
         if (this._currentlyDrawing) {
             const p = this._currentlyDrawing.params;    // For convenience
             switch (clickNumber) {
@@ -252,7 +287,7 @@ export default class ModuleCanvas extends EditorField {
                         p5.fill(CONSTANTS.colors.BLUEGREEN_CRYSTAL);    // Show the first point in blue
                         p5.ellipse(x, y, 8);
                         p5.fill(this._currentlyDrawing.color);         // Trace a line from the first point to the current mouse coords
-                        p5.line(x, y, mouseX, mouseY);
+                        p5.line(x, y, snapX, snapY);
                     }
                     break;
                 case 2:
@@ -264,7 +299,7 @@ export default class ModuleCanvas extends EditorField {
                         p5.ellipse(p2.x, p2.y, 8);
                         p5.fill(this._currentlyDrawing.color);
                         p5.line(p1.x, p1.y, p2.x, p2.y);
-                        p5.triangle(p1.x, p1.y, p2.x, p2.y, mouseX, mouseY);
+                        p5.triangle(p1.x, p1.y, p2.x, p2.y, snapX, snapY);
                     }
                     break;
                 case 3:
@@ -277,17 +312,18 @@ export default class ModuleCanvas extends EditorField {
                         p5.ellipse(p2.x, p2.y, 8);
                         p5.ellipse(p3.x, p3.y, 8);
                         p5.fill(this._currentlyDrawing.color);
-                        p5.quad(p1.x, p1.y, p2.x, p2.y, p3.x, p3.y, mouseX, mouseY);
+                        p5.quad(p1.x, p1.y, p2.x, p2.y, p3.x, p3.y, snapX, snapY);
                     }
             }
         }
         
         // Follow the mouse cursor with a green circle
         p5.fill(CONSTANTS.colors.GREEN_TERMINAL);
-        p5.ellipse(mouseX, mouseY, 8);
+        p5.ellipse(snapX, snapY, 8);
     }
 
     renderTrianglePlacement = (p5: P5, mouseX: number, mouseY: number, clickNumber: number) => {
+        const { snapX, snapY } = this.gridifyMouseCoords(mouseX, mouseY);
         if (this._currentlyDrawing) {
             const p = this._currentlyDrawing.params;    // For convenience
             switch (clickNumber) {
@@ -299,7 +335,7 @@ export default class ModuleCanvas extends EditorField {
                         p5.fill(CONSTANTS.colors.BLUEGREEN_CRYSTAL);    // Show the first point in blue
                         p5.ellipse(x, y, 8);
                         p5.fill(this._currentlyDrawing.color);         // Trace a line from the first point to the current mouse coords
-                        p5.line(x, y, mouseX, mouseY);
+                        p5.line(x, y, snapX, snapY);
                     }
                     break;
                 case 2:
@@ -311,17 +347,18 @@ export default class ModuleCanvas extends EditorField {
                         p5.ellipse(p2.x, p2.y, 8);
                         p5.fill(this._currentlyDrawing.color);
                         p5.line(p1.x, p1.y, p2.x, p2.y);
-                        p5.triangle(p1.x, p1.y, p2.x, p2.y, mouseX, mouseY);
+                        p5.triangle(p1.x, p1.y, p2.x, p2.y, snapX, snapY);
                     }
                     break;
             }
         }
         // Follow the mouse cursor with a green circle
         p5.fill(CONSTANTS.colors.GREEN_TERMINAL);
-        p5.ellipse(mouseX, mouseY, 8);
+        p5.ellipse(snapX, snapY, 8);
     }
 
     renderEllipsePlacement = (p5: P5, mouseX: number, mouseY: number, clickNumber: number) => {
+        const { snapX, snapY } = this.gridifyMouseCoords(mouseX, mouseY);
         if (this._currentlyDrawing) {
             const p = this._currentlyDrawing.params;    // For convenience
             switch (clickNumber) {
@@ -333,8 +370,8 @@ export default class ModuleCanvas extends EditorField {
                         p5.fill(CONSTANTS.colors.BLUEGREEN_CRYSTAL);    // Show the center point in blue
                         p5.ellipse(x, y, 8);
                         p5.fill(this._currentlyDrawing.color);          // Draw out the rest of the circle to the mouse location
-                        const w = (x - mouseX) * 2;
-                        const h = (y - mouseY) * 2
+                        const w = (x - snapX) * 2;
+                        const h = (y - snapY) * 2
                         if (this._perfectCircles) {
                             p5.ellipse(x, y, w);        // If perfect circles mode is enabled, just use width to set radius
                         } else {
@@ -346,10 +383,11 @@ export default class ModuleCanvas extends EditorField {
         }
         // Follow the mouse cursor with a green circle
         p5.fill(CONSTANTS.colors.GREEN_TERMINAL);
-        p5.ellipse(mouseX, mouseY, 8);
+        p5.ellipse(snapX, snapY, 8);
     }
 
     renderArcPlacement = (p5: P5, mouseX: number, mouseY: number, clickNumber: number) => {
+        const { snapX, snapY } = this.gridifyMouseCoords(mouseX, mouseY);
         if (this._currentlyDrawing) {
             const p = this._currentlyDrawing.params;    // For convenience
             switch (clickNumber) {
@@ -361,8 +399,8 @@ export default class ModuleCanvas extends EditorField {
                         p5.fill(CONSTANTS.colors.BLUEGREEN_CRYSTAL);    // Show the center point in blue
                         p5.ellipse(x, y, 8);
                         p5.fill(this._currentlyDrawing.color);          // Draw out the rest of the circle to the mouse location
-                        const w = (x - mouseX) * 2;
-                        const h = (y - mouseY) * 2
+                        const w = (x - snapX) * 2;
+                        const h = (y - snapY) * 2
                         if (this._perfectCircles) {
                             p5.ellipse(x, y, w, w);     // If circles mode is enabled, use width twice (h value is non-optional for arcs!)
                         } else {
@@ -385,8 +423,6 @@ export default class ModuleCanvas extends EditorField {
                         mode = p5.CHORD;        // Chord is default
                     }
                     p5.arc(x, y, w, h, mouseRadians, 0, mode);
-                    p5.text(mouseX, 500, 450);
-                    p5.text(mouseRadians.toFixed(2), 500, 500);
                     break;
                 case 3: // Arc finish placement
                     const mouseRads = mouseX / 60 // User has to move the mouse 376 pixels left/right to rotate the start a full revolution
@@ -404,14 +440,12 @@ export default class ModuleCanvas extends EditorField {
                         m = p5.CHORD;        // Chord is default
                     }
                     p5.arc(center.x, center.y, width, height, start, mouseRads, m);
-                    p5.text(mouseX, 500, 450);
-                    p5.text(mouseRads.toFixed(2), 500, 500);
                 break;
             }
         }
         // Follow the mouse cursor with a green circle
         p5.fill(CONSTANTS.colors.GREEN_TERMINAL);
-        p5.ellipse(mouseX, mouseY, 8);
+        p5.ellipse(snapX, snapY, 8);
     }
 
     // Optionally takes mouse coordinates + click number if a new shape is being drawn

@@ -30,6 +30,16 @@ body {
   left: $module-inputs-left;
 }
 
+.grid-snap-input {
+  border-radius: 8px;
+  position: relative;
+  width: 40px;
+  font-size: 20px;
+  height: 32px;
+  top: -308px;
+  left: 450px;
+}
+
 .save-game-name {
   border-radius: 0px;
   border: 2px solid blueviolet;

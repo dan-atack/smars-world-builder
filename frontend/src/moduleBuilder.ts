@@ -27,6 +27,7 @@ export default class ModuleBuilder extends Screen {
     _mouseClicks: number;   // Used to keep track of the number of clicks that have occurred in a shape placement sequence
     _circleMode: boolean;   // Used to tell the module canvas to paint only perfect circles (true) or to allow ellipses (false)
     _arcMode: string;       // For arcs; either 'CHORD', 'OPEN', or 'PIE'
+    _gridSnap: number;      // How many pixels to 'snap to' when creating new shapes
     modulesFromDatabase: [string, string][];
     loadedModule: ModuleInfo | null;
     getModules: (setter: (data?: []) => void) => void;
@@ -57,13 +58,14 @@ export default class ModuleBuilder extends Screen {
         this._layersList = new LayersList(CONSTANTS.SCREEN_WIDTH - CONSTANTS.NAVBAR_X * 2, CONSTANTS.NAVBAR_HEIGHT, CONSTANTS.NAVBAR_X, CONSTANTS.SCREEN_HEIGHT - CONSTANTS.NAVBAR_HEIGHT * 2, "LAYERS");
         this._moduleCanvas = new ModuleCanvas(CONSTANTS.NAVBAR_X, CONSTANTS.NAVBAR_HEIGHT, CONSTANTS.NAVBAR_WIDTH - CONSTANTS.NAVBAR_X, CONSTANTS.SCREEN_HEIGHT - CONSTANTS.NAVBAR_HEIGHT * 2, "CANVAS");
         this._shapeSelector = new ShapeSelector(CONSTANTS.NAVBAR_X, CONSTANTS.SCREEN_HEIGHT - CONSTANTS.NAVBAR_HEIGHT, CONSTANTS.NAVBAR_WIDTH - CONSTANTS.NAVBAR_X, CONSTANTS.NAVBAR_HEIGHT, this.setShape);
-        this._shapeOptions = new ShapeOptions(CONSTANTS.NAVBAR_X + CONSTANTS.NAVBAR_WIDTH - CONSTANTS.NAVBAR_X, CONSTANTS.SCREEN_HEIGHT - CONSTANTS.NAVBAR_HEIGHT, CONSTANTS.NAVBAR_X, CONSTANTS.NAVBAR_HEIGHT, this.setCircleMode, this.setArcMode);
+        this._shapeOptions = new ShapeOptions(CONSTANTS.NAVBAR_X + CONSTANTS.NAVBAR_WIDTH - CONSTANTS.NAVBAR_X, CONSTANTS.SCREEN_HEIGHT - CONSTANTS.NAVBAR_HEIGHT, CONSTANTS.NAVBAR_X, CONSTANTS.NAVBAR_HEIGHT, this.setCircleMode, this.setArcMode, this.setGridSnap);
         this._currentColour = "#000000";        // Black by default
         this._currentShape = "";                // No shape by default
         this._mouseContext = "default";         // Default to regular mouse context (no shape placement)
         this._mouseClicks = 0;                  // Only keep track of mouse clicks during shape placement
         this._circleMode = false;               // By default, the ellipse button will produce an ellipse
         this._arcMode = "CHORD";                // All arcs are 'chord' style by default
+        this._gridSnap = 1;                     // 1 pixel (no snap) is default
         this.modulesFromDatabase = [];
         this.loadedModule = null;               // By default no module is loaded
         this.getModules = getModules;
@@ -72,7 +74,7 @@ export default class ModuleBuilder extends Screen {
     }
 
     // STILL TODO:
-    // - Snap-to-grid mode
+    // - Resource inputs
     // - Layers display? Very quickly, maybe?
 
     // SECTION 1: Basic Setup
@@ -85,7 +87,7 @@ export default class ModuleBuilder extends Screen {
         this._layersList.setup();
         this._moduleCanvas.setup();
         this._shapeSelector.setup();
-        this._shapeOptions.setup();
+        this._shapeOptions.setup(p5);
         this.getModules(this.setModules);
     }
 
@@ -101,12 +103,10 @@ export default class ModuleBuilder extends Screen {
     // Takes the current colour from the colour palette component
     setColour = (colour: string) => {
         this._currentColour = colour;
-        console.log(this._currentColour);
     }
 
     // Sets the shape about to be rendered in the canvas area, and sets mouse context
     setShape = (shape: string) => {
-        console.log(`Setting shape: ${shape}`);
         this._currentShape = shape;
         const context: string = `place-${shape}`;
         this.setMouseContext(context);
@@ -140,6 +140,11 @@ export default class ModuleBuilder extends Screen {
             this._arcMode = "CHORD";
         }
         this._moduleCanvas.setArcMode(this._arcMode);       // Pass on the message to the canvas component!
+    }
+
+    setGridSnap = (pixels: number) => {
+        this._gridSnap = pixels;
+        this._moduleCanvas.setGridSnap(this._gridSnap);       // Pass on the message to the canvas component!
     }
 
     // SECTION 3: Click Handlers & Mouse Context
