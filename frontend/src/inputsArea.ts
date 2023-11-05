@@ -1,6 +1,6 @@
 // A sub-component of the Module Builder class, the Inputs Area holds the text fields for controlling all of the module's non-visual data
 import P5 from "p5";
-import { CONSTANTS, ModuleInfo } from "./constants";
+import { CONSTANTS, ModuleInfo, Resource } from "./constants";
 import EditorField from "./editorField";
 import Button from "./button";
 
@@ -8,7 +8,10 @@ export default class InputsArea extends EditorField {
     _data: ModuleInfo;                      // The data object for the module being designed
     // Input fields:
     _inputs: P5.Element[];                  // Top-level input list; used to efficiently track changes to any text input field
+    _resourceInputs: P5.Element[];          // Top-level list list just for resource quantities
     _labels: string[];                      // Top-level list of the labels for input fields, to be mapped next to the input boxes
+    _resourceLabels: string[];              // Top-level list of the labels just for resource input fields
+    _resourceLabelHeights: number[];        // List of resource label y values (to repeat for each row)
     _name: P5.Element | null;               // Inputs will be null when constructed and then get input fields created by the setup method
     _type: P5.Element | null;
     _modWidth: P5.Element | null;
@@ -18,8 +21,9 @@ export default class InputsArea extends EditorField {
     _cost: P5.Element | null;               // This one will take a number and convert it into a resource (e.g. ["money", 500])
     _pressurized: Button;                   // Boolean value inputs will have custom-made buttons instead
     setModuleData: (data: ModuleInfo) => void;  // Updater function passed down by the parent (ModuleBuilder) class
+    addResource: (category: string, resource: Resource) => void;    // Also passed down by the MB class; for setting resource field quantities
 
-    constructor(x: number, y: number, w: number, h: number, setModuleData: (data: ModuleInfo) => void) {
+    constructor(x: number, y: number, w: number, h: number, setModuleData: (data: ModuleInfo) => void, addResource: (category: string, resource: Resource) => void) {
         super(x, y, w, h);
         this._data = {          // Basic empty module data template
             name: "",
@@ -37,7 +41,8 @@ export default class InputsArea extends EditorField {
             crewCapacity: 0,
             shapes: []
         };
-        this._inputs = [];      // Inputs will be created by the setup method to avoid using P5 in the constructor
+        this._inputs = [];              // Inputs will be created by the setup method to avoid using P5 in the constructor
+        this._resourceInputs = [];      // To be created by setup
         this._labels = [
             "Name.................",
             "Type.................",
@@ -47,6 +52,18 @@ export default class InputsArea extends EditorField {
             "Durability...........",
             "Cost (x $0.01)......."
         ];
+        this._resourceLabels = [
+            "Oxygen",
+            "Water",
+            "Food",
+            "Power"
+        ]
+        this._resourceLabelHeights = [
+            400,
+            500,
+            600,
+            700
+        ]
         this._name = null;
         this._type = null;
         this._modWidth = null;
@@ -56,6 +73,7 @@ export default class InputsArea extends EditorField {
         this._cost = null;
         this._pressurized = new Button("P", this._x + 8, 400, this.handlePressurized, 32, 32, CONSTANTS.colors.GREEN_TERMINAL, CONSTANTS.colors.GREEN_DARK, 20, "ellipse");
         this.setModuleData = setModuleData;
+        this.addResource = addResource;
     }
 
     setup = (p5: P5) => {
@@ -80,7 +98,7 @@ export default class InputsArea extends EditorField {
             //@ts-ignore
             input.input(this.handleUpdates);
         });
-        console.log(this._data);
+        // TODO: Add resource input fields separately
     }
 
     // SECTION 1: GENERAL UPDATER METHOD (Runs on any change to any input field)
@@ -121,10 +139,16 @@ export default class InputsArea extends EditorField {
         });
         p5.textAlign(p5.CENTER);
         p5.textSize(20);
-        p5.text("Maintenance", this._x + this._width / 2, 360);
-        p5.text("Storage", this._x + this._width / 2, 460);
-        p5.text("Inputs", this._x + this._width / 2, 560);
-        p5.text("Outputs", this._x + this._width / 2, 660);
+        p5.text("Storage", this._x + this._width / 2, 372);
+        p5.text("Maintenance", this._x + this._width / 2, 472);
+        p5.text("Inputs", this._x + this._width / 2, 572);
+        p5.text("Outputs", this._x + this._width / 2, 672);
+        p5.textSize(18);
+        this._resourceLabelHeights.forEach((h) => {
+            this._resourceLabels.forEach((label, idx) => {
+                p5.text(label, this._x + idx * (this._width / 4) + 40, h);
+            })
+        })
     }
 
 }

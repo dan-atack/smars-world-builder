@@ -8,7 +8,7 @@ import LayersList from "./layersList";
 import ModuleCanvas from "./moduleCanvas";
 import ShapeSelector from "./shapeSelector";
 import ShapeOptions from "./shapeOptions";
-import { CONSTANTS, ModuleInfo, Shape } from "./constants";
+import { CONSTANTS, ModuleInfo, Resource, Shape } from "./constants";
 import { getModules, getOneModule, addNewModule } from "./server_functions";
 
 export default class ModuleBuilder extends Screen {
@@ -54,7 +54,7 @@ export default class ModuleBuilder extends Screen {
         };
         this._navbar = new Navbar(CONSTANTS.NAVBAR_X, 0, CONSTANTS.NAVBAR_WIDTH, CONSTANTS.NAVBAR_HEIGHT, switchScreen);
         this._colourPalette = new ColourPalette(0, 0, CONSTANTS.NAVBAR_X, CONSTANTS.SCREEN_HEIGHT, this.setColour);
-        this._inputsArea = new InputsArea(CONSTANTS.NAVBAR_X + CONSTANTS.NAVBAR_WIDTH, 0, CONSTANTS.NAVBAR_X, CONSTANTS.SCREEN_HEIGHT, this.setModuleData);
+        this._inputsArea = new InputsArea(CONSTANTS.NAVBAR_X + CONSTANTS.NAVBAR_WIDTH, 0, CONSTANTS.NAVBAR_X, CONSTANTS.SCREEN_HEIGHT, this.setModuleData, this.addResource);
         this._layersList = new LayersList(CONSTANTS.SCREEN_WIDTH - CONSTANTS.NAVBAR_X * 2, CONSTANTS.NAVBAR_HEIGHT, CONSTANTS.NAVBAR_X, CONSTANTS.SCREEN_HEIGHT - CONSTANTS.NAVBAR_HEIGHT * 2, "LAYERS");
         this._moduleCanvas = new ModuleCanvas(CONSTANTS.NAVBAR_X, CONSTANTS.NAVBAR_HEIGHT, CONSTANTS.NAVBAR_WIDTH - CONSTANTS.NAVBAR_X, CONSTANTS.SCREEN_HEIGHT - CONSTANTS.NAVBAR_HEIGHT * 2, "CANVAS");
         this._shapeSelector = new ShapeSelector(CONSTANTS.NAVBAR_X, CONSTANTS.SCREEN_HEIGHT - CONSTANTS.NAVBAR_HEIGHT, CONSTANTS.NAVBAR_WIDTH - CONSTANTS.NAVBAR_X, CONSTANTS.NAVBAR_HEIGHT, this.setShape);
@@ -98,6 +98,11 @@ export default class ModuleBuilder extends Screen {
         this._data = data;
         // Propagate change to the canvas if width or height are affected
         this._moduleCanvas.updateCanvasSize(data.width, data.height);
+    }
+
+    // Passed to the Inputs area; adds a Resource to the new module's storage/maintenance/inputs/outputs field when a value is given
+    addResource = (category: string, resource: Resource) => {
+        console.log(category);
     }
 
     // Takes the current colour from the colour palette component
