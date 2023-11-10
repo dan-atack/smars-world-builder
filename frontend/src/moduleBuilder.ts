@@ -102,8 +102,10 @@ export default class ModuleBuilder extends Screen {
 
     // Passed to the Inputs area; adds a Resource to the new module's storage/maintenance/inputs/outputs field when a value is given
     addResource = (category: string, resource: Resource) => {
+        // Note: Category string will be upper-case
         // TODO: If a resource's quantity is zero, remove that resource from the category in question
         console.log(category);
+        console.log(resource);
     }
 
     // Takes the current colour from the colour palette component

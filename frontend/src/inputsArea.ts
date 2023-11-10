@@ -8,12 +8,12 @@ export default class InputsArea extends EditorField {
     _data: ModuleInfo;                      // The data object for the module being designed
     // Input fields:
     _inputs: P5.Element[];                  // Top-level input list; used to efficiently track changes to any text input field
-    _resourceStorageInputs: P5.Element[];   // Top-level list just for resource storage quantities
-    _resourceMaintenanceInputs: P5.Element[];   // Top-level list just for resource maintenance quantities
-    _resourceInputInputs: P5.Element[];     // Top-level list just for resource input quantities
-    _resourceOutputInputs: P5.Element[];    // Top-level list just for resource output quantities
+    _storageInputs: P5.Element[];           // Top-level list just for resource storage quantities
+    _maintenanceInputs: P5.Element[];       // Top-level list just for resource maintenance quantities
+    _inputInputs: P5.Element[];             // Top-level list just for resource input quantities
+    _outputInputs: P5.Element[];            // Top-level list just for resource output quantities
     _labels: string[];                      // Top-level list of the labels for input fields, to be mapped next to the input boxes
-    _resourceLabels: string[];              // Top-level list of the labels just for resource input fields
+    _resourceTypes: string[];               // Top-level list of the types of resource - for labels and name values for resource input fields
     _resourceLabelHeights: number[];        // List of resource label y values (to repeat for each row)
     _name: P5.Element | null;               // Inputs will be null when constructed and then get input fields created by the setup method
     _type: P5.Element | null;
@@ -45,10 +45,11 @@ export default class InputsArea extends EditorField {
             shapes: []
         };
         this._inputs = [];                      // Inputs will be created by the setup method to avoid using P5 in the constructor
-        this._resourceStorageInputs = [];       // To be created by setup
-        this._resourceMaintenanceInputs = [];   // To be created by setup
-        this._resourceInputInputs = [];         // To be created by setup
-        this._resourceOutputInputs = [];        // To be created by setup
+        // Each type of resource (oxygen, water, food and power) will be added individually to each type of resource category
+        this._storageInputs = [];       // To be created by setup
+        this._maintenanceInputs = [];   // To be created by setup
+        this._inputInputs = [];         // To be created by setup
+        this._outputInputs = [];        // To be created by setup
         this._labels = [
             "Name.................",
             "Type.................",
@@ -58,7 +59,7 @@ export default class InputsArea extends EditorField {
             "Durability...........",
             "Cost (x $0.01)......."
         ];
-        this._resourceLabels = [
+        this._resourceTypes = [
             "Oxygen",
             "Water",
             "Food",
@@ -104,66 +105,21 @@ export default class InputsArea extends EditorField {
             //@ts-ignore
             input.input(this.handleUpdates);
         });
-        // Add resource input fields by category
-        // Storage
-        const storageOxy = p5.createInput("0", "number");
-        this._resourceStorageInputs.push(storageOxy);
-        const storageWater = p5.createInput("0", "number");
-        this._resourceStorageInputs.push(storageWater);
-        const storageFood = p5.createInput("0", "number");
-        this._resourceStorageInputs.push(storageFood);
-        const storagePower = p5.createInput("0", "number");
-        this._resourceStorageInputs.push(storagePower);
-        this._resourceStorageInputs.forEach((input) => {
-            input.parent("storage-inputs");
-            input.class("storage-input");
-            //@ts-ignore
-            input.input(this.handleUpdates);
-        })
-        // Maintenance
-        const maintenanceOxy = p5.createInput("0", "number");
-        this._resourceMaintenanceInputs.push(maintenanceOxy);
-        const maintenanceWater = p5.createInput("0", "number");
-        this._resourceMaintenanceInputs.push(maintenanceWater);
-        const maintenanceFood = p5.createInput("0", "number");
-        this._resourceMaintenanceInputs.push(maintenanceFood);
-        const maintenancePower = p5.createInput("0", "number");
-        this._resourceMaintenanceInputs.push(maintenancePower);
-        this._resourceMaintenanceInputs.forEach((input) => {
-            input.parent("maintenance-inputs");
-            input.class("maintenance-input");
-            //@ts-ignore
-            input.input(this.handleUpdates);
-        })
-        // Inputs (for production) "AKA Input inputs"
-        const inputOxy = p5.createInput("0", "number");
-        this._resourceInputInputs.push(inputOxy);
-        const inputWater = p5.createInput("0", "number");
-        this._resourceInputInputs.push(inputWater);
-        const inputFood = p5.createInput("0", "number");
-        this._resourceInputInputs.push(inputFood);
-        const inputPower = p5.createInput("0", "number");
-        this._resourceInputInputs.push(inputPower);
-        this._resourceInputInputs.forEach((input) => {
-            input.parent("input-inputs");
-            input.class("input-input");
-            //@ts-ignore
-            input.input(this.handleUpdates);
-        })
-        // Outputs (for production) "AKA Output inputs"
-        const outputOxy = p5.createInput("0", "number");
-        this._resourceOutputInputs.push(outputOxy);
-        const outputWater = p5.createInput("0", "number");
-        this._resourceOutputInputs.push(outputWater);
-        const outputFood = p5.createInput("0", "number");
-        this._resourceOutputInputs.push(outputFood);
-        const outputPower = p5.createInput("0", "number");
-        this._resourceOutputInputs.push(outputPower);
-        this._resourceOutputInputs.forEach((input) => {
-            input.parent("output-inputs");
-            input.class("output-input");
-            //@ts-ignore
-            input.input(this.handleUpdates);
+        // Add resource input fields separately for each category
+        const resourceCategories = ["storage", "maintenance", "input", "output"];
+        resourceCategories.forEach((category) => {
+            this._resourceTypes.forEach((resource) => {
+                const input = p5.createInput("0", "number");
+                const name = `_${category}Inputs`;       // Form the name of the object key of the InputsArea resource input category
+                (this[name as (keyof InputsArea)] as P5.Element[]).push(input);
+                this._storageInputs.push(input);
+                input.parent(`${category}-inputs`);
+                input.class(`${category}-input`);
+                //@ts-ignore
+                input.input(() => {
+                    this.addResource(category, [resource, Number(input.value() as string)])
+                }); 
+            })
         })
     }
 
@@ -211,7 +167,7 @@ export default class InputsArea extends EditorField {
         p5.text("Outputs", this._x + this._width / 2, 672);
         p5.textSize(18);
         this._resourceLabelHeights.forEach((h) => {
-            this._resourceLabels.forEach((label, idx) => {
+            this._resourceTypes.forEach((label, idx) => {
                 p5.text(label, this._x + idx * (this._width / 4) + 40, h);
             })
         })
