@@ -57,7 +57,7 @@ export default class InputsArea extends EditorField {
             "Height(#)............",
             "Col. Strength........",
             "Durability...........",
-            "Cost (x $0.01)......."
+            "Cost (x $1.00)......."
         ];
         this._resourceTypes = [
             "Oxygen",
@@ -117,7 +117,7 @@ export default class InputsArea extends EditorField {
                 input.class(`${category}-input`);
                 //@ts-ignore
                 input.input(() => {
-                    this.addResource(category, [resource, Number(input.value() as string)])
+                    this.addResource(category, [resource, Number(input.value() as string) * 100])   // Convert to game units
                 }); 
             })
         })
@@ -132,7 +132,7 @@ export default class InputsArea extends EditorField {
         if (this._modHeight?.value()) this._data.height = Number(this._modHeight.value() as string);
         if (this._columnStrength?.value()) this._data.columnStrength = Number(this._columnStrength.value() as string);
         if (this._durability?.value()) this._data.durability = Number(this._durability.value() as string);
-        if (this._cost?.value()) this._data.buildCosts = [["money", Number(this._cost.value() as string)]];
+        if (this._cost?.value()) this._data.buildCosts = [["money", Number(this._cost.value() as string) * 100]];   // Convert to "dollars"
         this.setModuleData(this._data); // Pass updated value to the module builder screen
     }
 
@@ -171,6 +171,8 @@ export default class InputsArea extends EditorField {
                 p5.text(label, this._x + idx * (this._width / 4) + 40, h);
             })
         })
+        p5.textSize(18);
+        p5.text("Resource quantities are x 100\n(unlike cash)", this._x + this._width / 2, 776);
     }
 
 }

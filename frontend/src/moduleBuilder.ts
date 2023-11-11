@@ -102,11 +102,34 @@ export default class ModuleBuilder extends Screen {
 
     // Passed to the Inputs area; adds a Resource to the new module's storage/maintenance/inputs/outputs field when a value is given
     addResource = (category: string, resource: Resource) => {
-        // Note: Category string will be upper-case
-        // TODO: If a resource's quantity is zero, remove that resource from the category in question
-        console.log(category);
-        console.log(resource);
-    }
+        switch (category) {
+            case "storage":
+                // Filter out any previous entries for the resource (based on its name) then replace with the new value
+                this._data.storageCapacity = this._data.storageCapacity.filter((res) => res[0] !== resource[0]);
+                if (resource[1] > 0) this._data.storageCapacity.push(resource);     // Only add the resource if its quantity is > 0
+                break;
+            case "maintenance":
+                this._data.maintenanceCosts = this._data.maintenanceCosts.filter((res) => res[0] !== resource[0]);
+                if (resource[1] > 0) this._data.maintenanceCosts.push(resource);
+                break;
+            case "input":
+                if (this._data.productionInputs) {
+                    this._data.productionInputs = this._data.productionInputs.filter((res) => res[0] !== resource[0]);
+                    if (resource[1] > 0) this._data.productionInputs.push(resource);
+                }
+                break;
+            case "output":
+                if (this._data.productionOutputs) {
+                    this._data.productionOutputs = this._data.productionOutputs.filter((res) => res[0] !== resource[0]);
+                    if (resource[1] > 0) this._data.productionOutputs.push(resource);
+                }
+                break;
+            default:
+                console.log(`WARNING: Unrecognized resource category ${category} detected.`);
+        }
+        // If a resource's quantity is zero, remove that resource from the category in question
+        
+    }   
 
     // Takes the current colour from the colour palette component
     setColour = (colour: string) => {
