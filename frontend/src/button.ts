@@ -54,7 +54,6 @@ export default class Button {
             p5.stroke(this._color);
         }
         p5.fill(this._bgColor);    // Button BG color
-        // TODO: Impement switch case to render buttons with different shapes
         switch (this._shape) {
             case "rect":
                 p5.rect(this._x, this._y, this._width, this._height);

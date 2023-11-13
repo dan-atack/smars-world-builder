@@ -73,10 +73,6 @@ export default class ModuleBuilder extends Screen {
         this.addNewModule = addNewModule;
     }
 
-    // STILL TODO:
-    // - Resource inputs
-    // - Layers display? Very quickly, maybe?
-
     // SECTION 1: Basic Setup
 
     setup = (p5: P5) => {
@@ -191,6 +187,7 @@ export default class ModuleBuilder extends Screen {
         this._navbar.handleClick(x, y);
         this._colourPalette.handleClick(x, y);
         this._shapeOptions.handleClick(x, y);
+        this._layersList.handleClick(x, y);
         // Finally, log the entire data object to the console for maximum data visibility
         console.log(this._data);
     }
@@ -233,6 +230,7 @@ export default class ModuleBuilder extends Screen {
         if (shape) {
             console.log(`${shape.shape} completed. Adding to shapes stack`);
             this._data.shapes.push(shape);
+            this._layersList.addShape(shape.shape, shape.color);
             this.resetShape();
         } else {
             this._mouseClicks ++;   // If the shape isn't returned, augment mouse click counter

@@ -224,9 +224,7 @@ export default class ModuleCanvas extends EditorField {
         if (this._gridSnap > 0) {
             gridX = parseFloat((Math.floor((mouseX - this._x - this._leftMargin) / (this._scale * this._gridSnap)) * (this._scale * this._gridSnap) / (this._scale * this._smarsModuleWidth)).toFixed(2));
             gridY = parseFloat((Math.floor((mouseY - this._y - this._topMargin) / (this._scale * this._gridSnap)) * (this._scale * this._gridSnap) / (this._scale * this._smarsModuleWidth)).toFixed(2));
-            console.log(gridX);
         }
-        console.log(gridX);
         return { x: gridX, y: gridY};
     }
 
