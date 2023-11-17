@@ -55,7 +55,7 @@ export default class ModuleBuilder extends Screen {
         this._navbar = new Navbar(CONSTANTS.NAVBAR_X, 0, CONSTANTS.NAVBAR_WIDTH, CONSTANTS.NAVBAR_HEIGHT, switchScreen);
         this._colourPalette = new ColourPalette(0, 0, CONSTANTS.NAVBAR_X, CONSTANTS.SCREEN_HEIGHT, this.setColour);
         this._inputsArea = new InputsArea(CONSTANTS.NAVBAR_X + CONSTANTS.NAVBAR_WIDTH, 0, CONSTANTS.NAVBAR_X, CONSTANTS.SCREEN_HEIGHT, this.setModuleData, this.addResource);
-        this._layersList = new LayersList(CONSTANTS.SCREEN_WIDTH - CONSTANTS.NAVBAR_X * 2, CONSTANTS.NAVBAR_HEIGHT, CONSTANTS.NAVBAR_X, CONSTANTS.SCREEN_HEIGHT - CONSTANTS.NAVBAR_HEIGHT * 2, "LAYERS");
+        this._layersList = new LayersList(CONSTANTS.SCREEN_WIDTH - CONSTANTS.NAVBAR_X * 2, CONSTANTS.NAVBAR_HEIGHT, CONSTANTS.NAVBAR_X, CONSTANTS.SCREEN_HEIGHT - CONSTANTS.NAVBAR_HEIGHT * 2, this.deleteShape);
         this._moduleCanvas = new ModuleCanvas(CONSTANTS.NAVBAR_X, CONSTANTS.NAVBAR_HEIGHT, CONSTANTS.NAVBAR_WIDTH - CONSTANTS.NAVBAR_X, CONSTANTS.SCREEN_HEIGHT - CONSTANTS.NAVBAR_HEIGHT * 2, "CANVAS");
         this._shapeSelector = new ShapeSelector(CONSTANTS.NAVBAR_X, CONSTANTS.SCREEN_HEIGHT - CONSTANTS.NAVBAR_HEIGHT, CONSTANTS.NAVBAR_WIDTH - CONSTANTS.NAVBAR_X, CONSTANTS.NAVBAR_HEIGHT, this.setShape);
         this._shapeOptions = new ShapeOptions(CONSTANTS.NAVBAR_X + CONSTANTS.NAVBAR_WIDTH - CONSTANTS.NAVBAR_X, CONSTANTS.SCREEN_HEIGHT - CONSTANTS.NAVBAR_HEIGHT, CONSTANTS.NAVBAR_X, CONSTANTS.NAVBAR_HEIGHT, this.setCircleMode, this.setArcMode, this.setGridSnap);
@@ -176,9 +176,12 @@ export default class ModuleBuilder extends Screen {
         this._moduleCanvas.setGridSnap(this._gridSnap);       // Pass on the message to the canvas component!
     }
 
-    // Deletes a shape when its icon is clicked in the Layers List component
-    deleteShape = () => {
-        
+    // Deletes a shape when its icon is clicked in the Layers List component - layers list button returns the index position of the deleted shape
+    deleteShape = (index: number) => {
+        if (index > -1) {       // Only splice if the item is found
+            this._data.shapes.splice(index, 1);
+            this._moduleCanvas._shapes.splice(index, 1);    // Remove from the canvas as well
+        }
     }
 
     // SECTION 3: Click Handlers & Mouse Context

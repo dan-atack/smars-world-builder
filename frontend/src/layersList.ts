@@ -12,15 +12,17 @@ export default class LayersList extends EditorField {
     _buttonHeight: number;
     _currentSerial: number;     // Used for identifying buttons
     _buttonClicked: boolean;    // Used to prevent multiple buttons from firing from a single click
+    deleteShape: (index: number) => void;   // Passed down from the parent class to receive the index position of a deleted shape
 
-    constructor(x: number, y: number, w: number, h: number, label?: string) {
-        super(x, y, w, h, label);
+    constructor(x: number, y: number, w: number, h: number, deleteShape: (index: number) => void) {
+        super(x, y, w, h);
         this._buttonX = this._x + 8;
         this._buttonY = this._y + 8;
         this._buttonWidth = 48;
         this._buttonHeight = 48;
         this._currentSerial = 0;        // Start at zero
         this._buttonClicked = false;    // Resting value for this field should always be false
+        this.deleteShape = deleteShape;
     }
 
     setup = () => {
@@ -42,13 +44,14 @@ export default class LayersList extends EditorField {
         const id = String(this._currentSerial);    // Label the button with a serial number for identification
         this._currentSerial++;
         const y = this._buttons.length * this._buttonHeight + this._buttonY + (8 * this._buttons.length);
-        const button = new Button(id, this._buttonX, y, () => this.deleteShape(id), this._buttonWidth, this._buttonHeight, colour, colour, 22, shape);
+        const button = new Button(id, this._buttonX, y, () => this.handleDeleteShape(id), this._buttonWidth, this._buttonHeight, colour, colour, 22, shape);
         this._buttons.push(button);
     }
 
     // Called by an individual shape button to remove it from the stack
-    deleteShape = (id: string) =>{
-        console.log(`Deleting shape # ${id}`);
+    handleDeleteShape = (id: string) =>{
+        // Find the index position of the shape to be removed
+        const index = this._buttons.findIndex((btn) => btn._label === id);
         // Filter out the shape from the list
         this._buttons = this._buttons.filter((btn) => btn._label !== id);
         // Rearrange existing buttons' positions
@@ -56,6 +59,7 @@ export default class LayersList extends EditorField {
             btn._y = idx * this._buttonHeight + this._buttonY + (8 * idx);
         });
         this._buttonClicked = true;     // Set the button-clicked flag to true, to prevent other buttons from also firing
+        this.deleteShape(index);        // Pass the index to the parent class so it can delete the appropriate shape's data
     }
 
     render = (p5: P5) => {
