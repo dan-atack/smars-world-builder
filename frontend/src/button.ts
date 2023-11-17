@@ -38,6 +38,7 @@ export default class Button {
         const yMatch = mouseY >= this._y && mouseY < this._y + this._height;
         if (xMatch && yMatch) {
             this.handler();
+            console.log("CLICK")
         }
     }
 

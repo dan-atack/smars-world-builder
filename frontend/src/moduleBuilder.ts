@@ -159,6 +159,7 @@ export default class ModuleBuilder extends Screen {
         this._moduleCanvas.setPerfectCircleMode(this._circleMode);  // Pass on the message to the canvas component
     }
 
+    // Controls which type of arc mode will be used for new arc shapes
     setArcMode = (mode: string) => {
         if (mode === "PIE" || mode === "CHORD" || mode === "OPEN") {
             this._arcMode = mode;
@@ -169,9 +170,15 @@ export default class ModuleBuilder extends Screen {
         this._moduleCanvas.setArcMode(this._arcMode);       // Pass on the message to the canvas component!
     }
 
+    // Updates the granularity, in terms of pixels, set by the grid snap number input field (in the shape options component)
     setGridSnap = (pixels: number) => {
         this._gridSnap = pixels;
         this._moduleCanvas.setGridSnap(this._gridSnap);       // Pass on the message to the canvas component!
+    }
+
+    // Deletes a shape when its icon is clicked in the Layers List component
+    deleteShape = () => {
+        
     }
 
     // SECTION 3: Click Handlers & Mouse Context
@@ -228,7 +235,6 @@ export default class ModuleBuilder extends Screen {
                 this._mouseContext = "default";
         }
         if (shape) {
-            console.log(`${shape.shape} completed. Adding to shapes stack`);
             this._data.shapes.push(shape);
             this._layersList.addShape(shape.shape, shape.color);
             this.resetShape();
