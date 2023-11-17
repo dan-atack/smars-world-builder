@@ -1,7 +1,7 @@
 // A generic sub-component shared by many screens, the Navbar contains high-level editor options (save, load, new, and main menu)
 import P5 from "p5";
 import Button from "./button";
-import { CONSTANTS } from "./constants";
+import { CONSTANTS, ModuleInfo } from "./constants";
 import EditorField from "./editorField";
 
 export default class Navbar extends EditorField {
@@ -13,8 +13,9 @@ export default class Navbar extends EditorField {
     _buttonTextSize: number;
     _buttonMargin: number;
     switchScreen: (screen: string) => void;
+    saveModule: () => void;     // Passed down from the parent class; triggers a database save action
 
-    constructor(x: number, y: number, w: number, h: number, switchScreen: (screen: string) => void) {
+    constructor(x: number, y: number, w: number, h: number, switchScreen: (screen: string) => void, saveModule: () => void) {
         super(x, y, w, h);
         this._buttonX = this._x + 8;
         this._buttonY = this._y + 16;
@@ -23,6 +24,7 @@ export default class Navbar extends EditorField {
         this._buttonTextSize = 36;
         this._buttonMargin = 16;
         this.switchScreen = switchScreen;
+        this.saveModule = saveModule;
     }
 
     // SECTION 0: SETUP
@@ -47,7 +49,7 @@ export default class Navbar extends EditorField {
 
     // Attempts to push the current object to the local database
     handleSave = () => {
-        console.log("SAVE");
+        this.saveModule();
     }
 
     // Loads a saved object from the DB

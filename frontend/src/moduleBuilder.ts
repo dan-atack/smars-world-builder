@@ -52,7 +52,7 @@ export default class ModuleBuilder extends Screen {
             crewCapacity: 0,
             shapes: []
         };
-        this._navbar = new Navbar(CONSTANTS.NAVBAR_X, 0, CONSTANTS.NAVBAR_WIDTH, CONSTANTS.NAVBAR_HEIGHT, switchScreen);
+        this._navbar = new Navbar(CONSTANTS.NAVBAR_X, 0, CONSTANTS.NAVBAR_WIDTH, CONSTANTS.NAVBAR_HEIGHT, switchScreen, this.saveModule);
         this._colourPalette = new ColourPalette(0, 0, CONSTANTS.NAVBAR_X, CONSTANTS.SCREEN_HEIGHT, this.setColour);
         this._inputsArea = new InputsArea(CONSTANTS.NAVBAR_X + CONSTANTS.NAVBAR_WIDTH, 0, CONSTANTS.NAVBAR_X, CONSTANTS.SCREEN_HEIGHT, this.setModuleData, this.addResource);
         this._layersList = new LayersList(CONSTANTS.SCREEN_WIDTH - CONSTANTS.NAVBAR_X * 2, CONSTANTS.NAVBAR_HEIGHT, CONSTANTS.NAVBAR_X, CONSTANTS.SCREEN_HEIGHT - CONSTANTS.NAVBAR_HEIGHT * 2, this.deleteShape);
@@ -246,8 +246,9 @@ export default class ModuleBuilder extends Screen {
         }
     }
 
-    // SECTION 5: Module Data Loading methods
+    // SECTION 5: Module Data Saving / Loading methods
 
+    // Test method to get the list of modules currently in the DB (to help prevent duplicate names)
     setModules = (data?: [string, string][]) => {
         if (data) {
             this.modulesFromDatabase = data;
@@ -256,11 +257,21 @@ export default class ModuleBuilder extends Screen {
         }
     }
 
+    // TODO: Use this to load an existing module in order to edit it
     setOneModule = (data?: ModuleInfo) => {
         if (data) {
             this.loadedModule = data;
         } else {
             console.log("ERROR: Failed to import module data from database.");
+        }
+    }
+
+    // Passed down to the Navbar component to push the current Module Data to the database
+    saveModule = () => {
+        if (this._data.name !== "") {     // Ensure the user has selected a name before allowing the save to proceed
+            this.addNewModule(this._data);
+        } else {
+            console.log("ERROR: Please select a name for your new module before saving it to the database.");
         }
     }
 

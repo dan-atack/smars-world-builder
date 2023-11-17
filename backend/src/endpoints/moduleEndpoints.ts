@@ -9,6 +9,6 @@ const { loadModules, loadModuleData, newModuleData } = require("../functions/mod
 
 router.get('/api/get-modules', loadModules);
 router.get('/api/get-module-data/:id', loadModuleData);
-router.post('/api/add-new-module');
+router.post('/api/add-new-module', newModuleData);
 
 module.exports = router;

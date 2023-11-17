@@ -53,6 +53,7 @@ export const getOneModule = (id: string, setter: (data?: ModuleInfo) => void) =>
 // Sends the data for a brand new module to the database
 export const addNewModule = (data: ModuleInfo) => {
     const url = `${CONSTANTS.URL_PREFIX}/add-new-module`;
+    console.log(`Adding new module: ${data.name}`);
     fetch(url, {
         method: "POST",
         body: JSON.stringify(data),
