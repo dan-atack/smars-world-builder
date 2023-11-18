@@ -146,6 +146,7 @@ export default class InputsArea extends EditorField {
         if (this._columnStrength?.value()) this._data.columnStrength = Number(this._columnStrength.value() as string);
         if (this._durability?.value()) this._data.durability = Number(this._durability.value() as string);
         if (this._cost?.value()) this._data.buildCosts = [["money", Number(this._cost.value() as string) * 100]];   // Convert to "dollars"
+        if (this._crewCapacity?.value()) this._data.crewCapacity = Number(this._crewCapacity.value() as string);
         this.setModuleData(this._data); // Pass updated value to the module builder screen
     }
 

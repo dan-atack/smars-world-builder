@@ -19,7 +19,7 @@ export default class LayersList extends EditorField {
         this._buttonX = this._x + 8;
         this._buttonY = this._y + 8;
         this._buttonWidth = 48;
-        this._buttonHeight = 48;
+        this._buttonHeight = 24;
         this._currentSerial = 0;        // Start at zero
         this._buttonClicked = false;    // Resting value for this field should always be false
         this.deleteShape = deleteShape;
