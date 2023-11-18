@@ -198,6 +198,7 @@ export default class ModuleBuilder extends Screen {
         this._colourPalette.handleClick(x, y);
         this._shapeOptions.handleClick(x, y);
         this._layersList.handleClick(x, y);
+        this._inputsArea.handleClick(x, y);
         // Finally, log the entire data object to the console for maximum data visibility
         console.log(this._data);
     }

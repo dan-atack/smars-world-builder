@@ -22,6 +22,7 @@ export default class InputsArea extends EditorField {
     _columnStrength: P5.Element | null;
     _durability: P5.Element | null;
     _cost: P5.Element | null;               // This one will take a number and convert it into a resource (e.g. ["money", 500])
+    _crewCapacity: P5.Element | null;
     _pressurized: Button;                   // Boolean value inputs will have custom-made buttons instead
     setModuleData: (data: ModuleInfo) => void;  // Updater function passed down by the parent (ModuleBuilder) class
     addResource: (category: string, resource: Resource) => void;    // Also passed down by the MB class; for setting resource field quantities
@@ -57,19 +58,21 @@ export default class InputsArea extends EditorField {
             "Height(#)............",
             "Col. Strength........",
             "Durability...........",
-            "Cost (x $1.00)......."
+            "Cost (x $1.00).......",
+            "Crew Cap.............",
+            "Pressurized.........."
         ];
-        this._resourceTypes = [
-            "Oxygen",
-            "Water",
-            "Food",
-            "Power"
+        this._resourceTypes = [     // NOTE: All resource names must be lowercase to match the game's data format
+            "oxygen",
+            "water",
+            "food",
+            "power"
         ]
         this._resourceLabelHeights = [
-            400,
-            500,
-            600,
-            700
+            436,
+            536,
+            636,
+            736
         ]
         this._name = null;
         this._type = null;
@@ -78,7 +81,9 @@ export default class InputsArea extends EditorField {
         this._columnStrength = null;
         this._durability = null;
         this._cost = null;
-        this._pressurized = new Button("P", this._x + 8, 400, this.handlePressurized, 32, 32, CONSTANTS.colors.GREEN_TERMINAL, CONSTANTS.colors.GREEN_DARK, 20, "ellipse");
+        this._crewCapacity = null;
+        this._pressurized = new Button("P", this._x + 160, 364, this.handlePressurized, 32, 32, CONSTANTS.colors.GREEN_TERMINAL, CONSTANTS.colors.GREEN_DARK, 20, "ellipse");
+        this._buttons.push(this._pressurized);
         this.setModuleData = setModuleData;
         this.addResource = addResource;
     }
@@ -98,6 +103,8 @@ export default class InputsArea extends EditorField {
         this._inputs.push(this._durability);
         this._cost = p5.createInput("100", "number");
         this._inputs.push(this._cost);
+        this._crewCapacity = p5.createInput("0", "number");
+        this._inputs.push(this._crewCapacity);
         // Add the inputs to the page, and style them
         this._inputs.forEach((input) => {
             input.parent("app");
@@ -123,6 +130,12 @@ export default class InputsArea extends EditorField {
         })
     }
 
+    handleClick = (mouseX: number, mouseY: number) => {
+        this._buttons.forEach((btn) => {
+            btn.handleClick(mouseX, mouseY);
+        })
+    }
+
     // SECTION 1: GENERAL UPDATER METHOD (Runs on any change to any input field)
     handleUpdates = () => {
         // Check each input field and use it to update the module's data for the corresponding value
@@ -138,8 +151,16 @@ export default class InputsArea extends EditorField {
 
     // SECTION 2: BUTTON HANDLER METHODS
 
+    // Pressurize button acts as a toggle switch
     handlePressurized = () => {
-        console.log("Pressurized");
+        if (this._data.pressurized) {
+            this._data.pressurized = false;
+            this._buttons[0].setSelected(false);
+        } else {
+            this._data.pressurized = true;
+            this._buttons[0].setSelected(true);
+        }
+        this.setModuleData(this._data); // Pass updated value to the module builder screen
     }
 
     render = (p5: P5) => {
@@ -153,7 +174,7 @@ export default class InputsArea extends EditorField {
         // Render input field labels alongside the fields
         p5.textAlign(p5.LEFT);
         this._labels.forEach((label, idx) => {
-            p5.text(label, this._x + 4, this._y + 100 + idx * 38);
+            p5.text(label, this._x + 4, this._y + 80 + idx * 38);
         })
         p5.stroke(0);
         this._buttons.forEach((button) => {
@@ -161,18 +182,20 @@ export default class InputsArea extends EditorField {
         });
         p5.textAlign(p5.CENTER);
         p5.textSize(20);
-        p5.text("Storage", this._x + this._width / 2, 372);
-        p5.text("Maintenance", this._x + this._width / 2, 472);
-        p5.text("Inputs", this._x + this._width / 2, 572);
-        p5.text("Outputs", this._x + this._width / 2, 672);
+        p5.text("Storage", this._x + this._width / 2, 412);
+        p5.text("Maintenance", this._x + this._width / 2, 512);
+        p5.text("Inputs", this._x + this._width / 2, 612);
+        p5.text("Outputs", this._x + this._width / 2, 712);
         p5.textSize(18);
         this._resourceLabelHeights.forEach((h) => {
             this._resourceTypes.forEach((label, idx) => {
                 p5.text(label, this._x + idx * (this._width / 4) + 40, h);
             })
         })
+        this._buttons.forEach((btn) => {
+            btn.render(p5);
+        })
         p5.textSize(18);
-        p5.text("Resource quantities are x 100\n(unlike cash)", this._x + this._width / 2, 776);
     }
 
 }
